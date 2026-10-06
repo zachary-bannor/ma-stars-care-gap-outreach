@@ -1,0 +1,6 @@
+outreach_id,member_id,measure_id,channel,attempt_ts,outcome,coordinator_id,next_action
+OH000000000,M00000004,EED,sms,2025-10-23,closed,CO017,none
+OH000000001,M00000005,EED,email,2025-01-21,closed,CO013,none
+OH000000002,M00000006,EED,sms,2025-04-05,unreachable,CO005,retry
+OH000000003,M00000007,EED,email,2025-02-15,no_response,CO006,retry
+OH000000004,M00000012,EED,mail,2025-07-13,no_response,CO014,retry

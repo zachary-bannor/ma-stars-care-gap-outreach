@@ -1,0 +1,17 @@
+bundle:
+  name: ma-stars-care-gap-outreach
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for all layers (pre-provisioned for the workspace).
+    default: zrb_fe_bar_uhc_stars_catalog
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://fevm-zrb-fe-bar-uhc-stars.cloud.databricks.com

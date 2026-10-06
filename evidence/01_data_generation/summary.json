@@ -1,0 +1,30 @@
+{
+  "dev_mode": false,
+  "seed": 42,
+  "n_members": 100000,
+  "measurement_year": 2026,
+  "prior_year": 2025,
+  "row_counts": {
+    "member_roster": 100000,
+    "providers": 400,
+    "medical_claims": 308610,
+    "pharmacy_fills": 215248,
+    "lab_results": 150546,
+    "outreach_history": 90250
+  },
+  "prevalence": {
+    "diabetes": 0.2661,
+    "hypertension": 0.6488,
+    "diabetics_on_meds": 0.2261,
+    "dual_eligible": 0.2023
+  },
+  "intended_open_gaps": {
+    "EED": 9827,
+    "GSD": 5835,
+    "CBP": 25874,
+    "COL": 19313,
+    "MAD": 6353
+  },
+  "intended_open_gaps_total": 67202,
+  "prior_year_outreach_closure_rate": 0.5334
+}

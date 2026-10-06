@@ -1,0 +1,19 @@
+# Databricks Asset Bundle state
+.databricks/
+*.pyc
+__pycache__/
+
+# local env
+.env
+.venv/
+venv/
+.DS_Store
+
+# editor
+.vscode/
+.idea/
+
+# never commit real credentials
+*.pem
+*.key
+.databrickscfg
