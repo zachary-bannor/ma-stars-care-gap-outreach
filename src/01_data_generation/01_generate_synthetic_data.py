@@ -157,6 +157,11 @@ z = (
     + rng.normal(0, 0.4, N_MEMBERS)        # irreducible noise so nothing is deterministic
 )
 p_close_latent = sigmoid(z)
+
+# distance is a real driver of the latent propensity, so emit it on the roster as an operational
+# attribute. Without this the model could not honestly learn the distance signal.
+roster["distance_to_provider_miles"] = distance_miles
+
 print(f"latent p_close  mean={p_close_latent.mean():.3f}  "
       f"p10={np.percentile(p_close_latent,10):.3f}  p90={np.percentile(p_close_latent,90):.3f}")
 

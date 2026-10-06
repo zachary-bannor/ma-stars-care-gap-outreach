@@ -1,6 +1,6 @@
-member_id,contract_id,plan_id,birth_date,sex,county,dual_eligible,enroll_start,tenure_months,digital_channel_on_file
-M00000001,H5678,H5678-003,1944-12-31,F,Harris,False,2026-02-04,11,False
-M00000002,H1234,H1234-003,1951-12-31,M,Maricopa,False,2024-02-15,35,False
-M00000003,H9012,H9012-003,1952-12-31,F,Maricopa,False,2025-02-09,23,False
-M00000004,H5678,H5678-003,1946-12-31,F,Travis,True,2023-09-18,40,False
-M00000005,H1234,H1234-003,1941-12-31,F,Cook,False,2024-03-16,34,False
+member_id,contract_id,plan_id,birth_date,sex,county,dual_eligible,enroll_start,tenure_months,digital_channel_on_file,distance_to_provider_miles
+M00000001,H5678,H5678-003,1944-12-31,F,Harris,False,2026-02-04,11,False,47.6
+M00000002,H1234,H1234-003,1951-12-31,M,Maricopa,False,2024-02-15,35,False,10.5
+M00000003,H9012,H9012-003,1952-12-31,F,Maricopa,False,2025-02-09,23,False,32.7
+M00000004,H5678,H5678-003,1946-12-31,F,Travis,True,2023-09-18,40,False,13.3
+M00000005,H1234,H1234-003,1941-12-31,F,Cook,False,2024-03-16,34,False,6.0
