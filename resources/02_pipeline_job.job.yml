@@ -1,0 +1,19 @@
+resources:
+  jobs:
+    care_gap_pipeline_job:
+      name: "[${bundle.target}] MA Stars - 02 Pipeline + Evidence"
+      tasks:
+        - task_key: run_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.care_gap_pipeline.id}
+            full_refresh: true
+        - task_key: pipeline_evidence
+          depends_on:
+            - task_key: run_pipeline
+          notebook_task:
+            notebook_path: ../src/02_lakeflow_pipeline/04_evidence.py
+            base_parameters:
+              catalog: ${var.catalog}
+              pipeline_id: ${resources.pipelines.care_gap_pipeline.id}
+      queue:
+        enabled: true

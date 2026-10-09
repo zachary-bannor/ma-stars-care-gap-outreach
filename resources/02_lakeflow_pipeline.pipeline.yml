@@ -1,0 +1,17 @@
+resources:
+  pipelines:
+    care_gap_pipeline:
+      name: "[${bundle.target}] MA Stars - 02 Care Gap Pipeline"
+      catalog: ${var.catalog}
+      schema: gold          # default schema; bronze/silver tables publish via qualified names
+      serverless: true
+      photon: true
+      configuration:
+        care_gap_catalog: ${var.catalog}
+      libraries:
+        - file:
+            path: ../src/02_lakeflow_pipeline/01_bronze.sql
+        - file:
+            path: ../src/02_lakeflow_pipeline/02_silver.sql
+        - file:
+            path: ../src/02_lakeflow_pipeline/03_gold.sql

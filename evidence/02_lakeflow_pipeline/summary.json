@@ -1,0 +1,146 @@
+{
+  "catalog": "zrb_fe_bar_uhc_stars_catalog",
+  "pipeline_id": "cc70432f-fe8c-4623-aa3a-c26447130718",
+  "row_counts": {
+    "bronze.medical_claims": 308610,
+    "bronze.pharmacy_fills": 215248,
+    "bronze.member_roster": 100000,
+    "bronze.lab_results": 150546,
+    "bronze.providers": 400,
+    "bronze.outreach_history": 90250,
+    "silver.members": 100000,
+    "silver.pdc": 22609,
+    "silver.prior_outreach": 59666,
+    "gold.care_gaps": 200330,
+    "gold.measure_weights": 5
+  },
+  "open_gaps_by_measure": {
+    "EED": 9827,
+    "GSD": 5835,
+    "CBP": 25874,
+    "COL": 19313,
+    "MAD": 6353
+  },
+  "derived_open_gaps_total": 67202,
+  "intended_open_gaps_total": 67202,
+  "total_delta": 0,
+  "reproduction": {
+    "EED": {
+      "intended": 9827,
+      "derived": 9827,
+      "delta": 0
+    },
+    "GSD": {
+      "intended": 5835,
+      "derived": 5835,
+      "delta": 0
+    },
+    "CBP": {
+      "intended": 25874,
+      "derived": 25874,
+      "delta": 0
+    },
+    "COL": {
+      "intended": 19313,
+      "derived": 19313,
+      "delta": 0
+    },
+    "MAD": {
+      "intended": 6353,
+      "derived": 6353,
+      "delta": 0
+    }
+  },
+  "expectations": [
+    {
+      "name": "valid_member_id",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.lab_results",
+      "passed": 150546,
+      "failed": 0
+    },
+    {
+      "name": "valid_result_date",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.lab_results",
+      "passed": 150546,
+      "failed": 0
+    },
+    {
+      "name": "valid_claim_status",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.medical_claims",
+      "passed": 308610,
+      "failed": 0
+    },
+    {
+      "name": "valid_member_id",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.medical_claims",
+      "passed": 308610,
+      "failed": 0
+    },
+    {
+      "name": "valid_service_date",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.medical_claims",
+      "passed": 308610,
+      "failed": 0
+    },
+    {
+      "name": "valid_birth_date",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.member_roster",
+      "passed": 100000,
+      "failed": 0
+    },
+    {
+      "name": "valid_member_id",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.member_roster",
+      "passed": 100000,
+      "failed": 0
+    },
+    {
+      "name": "valid_member_id",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.outreach_history",
+      "passed": 90250,
+      "failed": 0
+    },
+    {
+      "name": "valid_outcome",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.outreach_history",
+      "passed": 90250,
+      "failed": 0
+    },
+    {
+      "name": "valid_days_supply",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.pharmacy_fills",
+      "passed": 215248,
+      "failed": 0
+    },
+    {
+      "name": "valid_fill_date",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.pharmacy_fills",
+      "passed": 215248,
+      "failed": 0
+    },
+    {
+      "name": "valid_member_id",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.pharmacy_fills",
+      "passed": 215248,
+      "failed": 0
+    },
+    {
+      "name": "valid_provider_id",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.bronze.providers",
+      "passed": 400,
+      "failed": 0
+    },
+    {
+      "name": "valid_gap_status",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.gold.care_gaps",
+      "passed": 200330,
+      "failed": 0
+    },
+    {
+      "name": "valid_measure",
+      "dataset": "zrb_fe_bar_uhc_stars_catalog.gold.care_gaps",
+      "passed": 200330,
+      "failed": 0
+    }
+  ]
+}
