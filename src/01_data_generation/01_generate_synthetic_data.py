@@ -89,8 +89,16 @@ plan_id = np.array([f"{c}-{p:03d}" for c, p in zip(contract_id, rng.integers(1, 
 
 # Ages 65-90, skewed toward the mid-70s
 age = np.clip(rng.normal(74, 6, N_MEMBERS).round().astype(int), 65, 90)
-today = date(MEASUREMENT_YEAR, 12, 31)
-birth_date = np.array([today.replace(year=today.year - int(a)) for a in age])
+today = date(MEASUREMENT_YEAR, 12, 31)  # measurement anchor; used for enrollment start below
+# Birth date: randomize month/day within each member's birth year rather than pinning
+# everyone to Dec 31. Drawn from a dedicated RNG so the main stream (and every downstream
+# count: prevalence, open gaps, labels) is byte-for-byte unchanged. Age stays the integer
+# source of truth; any day in birth_year is still before the Dec-31 measurement date, so
+# age derived from birth_date as of year-end matches `age` exactly.
+bd_rng = np.random.default_rng(SEED + 1)
+birth_doy = bd_rng.integers(0, 365, N_MEMBERS)
+birth_date = np.array([date(MEASUREMENT_YEAR - int(a), 1, 1) + timedelta(days=int(d))
+                       for a, d in zip(age, birth_doy)])
 sex = rng.choice(["F", "M"], size=N_MEMBERS, p=[0.55, 0.45])
 county = rng.choice(COUNTIES, size=N_MEMBERS)
 dual_eligible = rng.random(N_MEMBERS) < 0.20
