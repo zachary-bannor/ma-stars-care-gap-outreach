@@ -1,0 +1,62 @@
+{
+  "endpoint": "zrb-stars-outreach-gateway",
+  "state": {
+    "ready": "READY",
+    "config_update": "NOT_UPDATING"
+  },
+  "served_entities": [
+    {
+      "name": "claude",
+      "external_model": {
+        "provider": "databricks-model-serving",
+        "name": "databricks-claude-sonnet-5-5",
+        "task": "llm/v1/chat",
+        "databricks_model_serving_config": {
+          "databricks_api_token": "<secret reference redacted>",
+          "databricks_workspace_url": "https://fevm-zrb-fe-bar-uhc-stars.cloud.databricks.com"
+        }
+      },
+      "type": "EXTERNAL_MODEL",
+      "state": {
+        "deployment": "DEPLOYMENT_READY",
+        "deployment_state_message": ""
+      },
+      "creator": "zachary.bannor@databricks.com",
+      "creation_timestamp": 1791567696000
+    }
+  ],
+  "ai_gateway": {
+    "usage_tracking_config": {
+      "enabled": true
+    },
+    "inference_table_config": {
+      "catalog_name": "zrb_fe_bar_uhc_stars_catalog",
+      "schema_name": "ops",
+      "table_name_prefix": "outreach_gateway",
+      "enabled": true
+    },
+    "rate_limits": [
+      {
+        "calls": 60,
+        "key": "endpoint",
+        "renewal_period": "minute"
+      }
+    ],
+    "guardrails": {
+      "input": {
+        "safety": true,
+        "pii_detection": true,
+        "pii": {
+          "behavior": "BLOCK"
+        }
+      },
+      "output": {
+        "safety": true,
+        "pii_detection": true,
+        "pii": {
+          "behavior": "BLOCK"
+        }
+      }
+    }
+  }
+}

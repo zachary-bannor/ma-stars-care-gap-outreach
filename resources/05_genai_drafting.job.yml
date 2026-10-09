@@ -1,0 +1,25 @@
+resources:
+  jobs:
+    genai_drafting_job:
+      name: "[${bundle.target}] MA Stars - 05 GenAI outreach drafting"
+      # Production target-state: run_as the engineer / pipeline service principal
+      # (var.engineer_principal). It reads gold.gap_scores + silver.members, writes
+      # gold.outreach_drafts, queries the gateway (granted CAN_QUERY in
+      # 00_setup_gateway.py), and owns the governance.outreach_drafts projection.
+      # Left commented for the same account-admin limit documented in Layers 3 and
+      # 4: binding run_as to a service principal needs the servicePrincipal.user
+      # role this workspace-admin-not-account-admin identity cannot assign, so the
+      # job runs as the workspace admin (a strict superset of the SP's grants) and
+      # swapping to the SP in a production account is a one-line change.
+      # run_as:
+      #   service_principal_name: ${var.engineer_principal}
+      tasks:
+        - task_key: generate_drafts
+          notebook_task:
+            notebook_path: ../src/05_genai_drafting/01_generate_drafts.py
+            base_parameters:
+              catalog: ${var.catalog}
+              coord_principal: ${var.coord_principal}
+              analyst_principal: ${var.analyst_principal}
+      queue:
+        enabled: true

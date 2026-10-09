@@ -1,0 +1,59 @@
+{
+  "endpoint": "zrb-stars-outreach-gateway",
+  "model": "databricks-claude-sonnet-5-5",
+  "guardrails": {
+    "input": {
+      "safety": true,
+      "pii_detection": true,
+      "pii": {
+        "behavior": "BLOCK"
+      }
+    },
+    "output": {
+      "safety": true,
+      "pii_detection": true,
+      "pii": {
+        "behavior": "BLOCK"
+      }
+    }
+  },
+  "rate_limit": "60/minute (endpoint)",
+  "usage_tracking_enabled": true,
+  "inference_table": {
+    "catalog_name": "zrb_fe_bar_uhc_stars_catalog",
+    "schema_name": "ops",
+    "table_name_prefix": "outreach_gateway",
+    "enabled": true
+  },
+  "total_drafts": 250,
+  "clean_pending_review": 250,
+  "distinct_segments": 8,
+  "auto_sendable": 0,
+  "by_measure": [
+    {
+      "measure_id": "CBP",
+      "drafts": 50,
+      "avg_expected_value": 0.8938
+    },
+    {
+      "measure_id": "COL",
+      "drafts": 50,
+      "avg_expected_value": 0.9081
+    },
+    {
+      "measure_id": "EED",
+      "drafts": 50,
+      "avg_expected_value": 0.8831
+    },
+    {
+      "measure_id": "GSD",
+      "drafts": 50,
+      "avg_expected_value": 0.8722
+    },
+    {
+      "measure_id": "MAD",
+      "drafts": 50,
+      "avg_expected_value": 2.3171
+    }
+  ]
+}

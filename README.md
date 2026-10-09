@@ -43,8 +43,8 @@ One connected journey, raw files to a worklist a coordinator actually works. The
 | 1. Data generation | Seeded synthetic senior MA population, raw source files landed in a volume | Built |
 | 2. Lakeflow pipeline | Auto Loader + DLT, bronze to gold, re-derives HEDIS gaps with data-quality expectations | Built |
 | 3. Unity Catalog governance | Governed consumption zone with column masks + contract row filter, least-privilege grants, PHI classification tags, lineage, three-persona enforcement proof | Built |
-| 4. ML propensity model | Gradient-boosted propensity-to-close, MLflow tracked, UC registered, batch scored | Planned |
-| 5. GenAI drafting | Foundation Model endpoint via Unity AI Gateway, drafts outreach + reason note | Planned |
+| 4. ML propensity model | Gradient-boosted propensity-to-close, MLflow tracked, UC registered, batch scored | Built |
+| 5. GenAI drafting | Governed Unity AI Gateway endpoint (guardrails, rate limit, usage tracking) over Claude Sonnet 5.5, drafts human-review outreach with no PHI sent to the model | Built |
 | 6. Lakebase worklist | Managed Postgres serving the ranked worklist with transactional write-back | Planned |
 | 7. Genie space | Natural-language analytics over the gold tables for the quality manager | Planned |
 | 8. Databricks App | Coordinator worklist UI, reads Lakebase, logs outreach back | Planned |
