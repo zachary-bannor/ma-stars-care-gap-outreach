@@ -24,7 +24,9 @@ def q(sql):
     r = w.statement_execution.execute_statement(
         warehouse_id=WAREHOUSE, statement=sql, catalog=CATALOG, wait_timeout="50s")
     if r.status.state != StatementState.SUCCEEDED:
-        raise RuntimeError(f"{r.status.error.message}\n  SQL: {sql}")
+        # On a timeout the statement is still RUNNING/PENDING and status.error is None.
+        msg = r.status.error.message if r.status.error else f"statement did not succeed (state={r.status.state})"
+        raise RuntimeError(f"{msg}\n  SQL: {sql}")
     cols = [c.name for c in r.manifest.schema.columns] if r.manifest and r.manifest.schema else []
     rows = r.result.data_array if (r.result and r.result.data_array) else []
     return cols, rows

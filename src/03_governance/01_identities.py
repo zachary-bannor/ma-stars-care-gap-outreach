@@ -7,7 +7,8 @@ work, not an in-cluster step):
 
 Idempotent: existing groups/SPs are reused. Prints a JSON block of the ids the
 downstream governance and evidence steps need. Credentials are never printed here;
-the test service principal's OAuth secret is minted separately by 02_mint_tester_secret.sh.
+the persona service principals' OAuth secrets are minted separately by
+01b_mint_persona_secrets.py.
 """
 import json
 from databricks.sdk import WorkspaceClient
@@ -26,9 +27,11 @@ GROUPS = [
     "zrb_stars_admins",              # governance owners
 ]
 
-# Machine identities. The pipeline SP runs automated writes; the tester SP is a
-# never-privileged principal used only to prove enforcement end to end.
-SPS = ["zrb_stars_pipeline_sp", "zrb_stars_governance_tester"]
+# Machine identities. Each persona the UC grant model targets is a real service
+# principal: the pipeline SP (data engineer) runs automated writes, and the
+# coordinator + analyst SPs are never-privileged principals used to prove
+# enforcement end to end. Break-glass + admin are the current user.
+SPS = ["zrb_stars_pipeline_sp", "zrb_stars_governance_tester", "zrb_stars_analyst_sp"]
 
 
 def ensure_group(name):
@@ -72,6 +75,7 @@ def main():
     add_member(gids["zrb_stars_phi_authorized"], me.id)
     add_member(gids["zrb_stars_data_engineers"], sps["zrb_stars_pipeline_sp"]["scim_id"])
     add_member(gids["zrb_stars_care_coordinators"], sps["zrb_stars_governance_tester"]["scim_id"])
+    add_member(gids["zrb_stars_quality_analysts"], sps["zrb_stars_analyst_sp"]["scim_id"])
 
     out = {
         "user": {"id": me.id, "userName": me.user_name},

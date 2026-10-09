@@ -13,7 +13,7 @@ CREATE TABLE zrb_fe_bar_uhc_stars_catalog.governance.care_gaps (
   gap_status STRING COLLATE UTF8_BINARY,
   due_date DATE,
   birth_date DATE MASK `zrb_fe_bar_uhc_stars_catalog`.`governance`.`fn_mask_birth_date`,
-  age INT,
+  age INT MASK `zrb_fe_bar_uhc_stars_catalog`.`governance`.`fn_mask_age`,
   sex STRING COLLATE UTF8_BINARY,
   county STRING COLLATE UTF8_BINARY,
   dual_eligible BOOLEAN MASK `zrb_fe_bar_uhc_stars_catalog`.`governance`.`fn_mask_dual`,
@@ -72,6 +72,12 @@ TBLPROPERTIES (
 ```
 
 ## Policy functions
+
+### governance.fn_mask_age
+
+```sql
+CASE WHEN is_member('zrb_stars_phi_authorized') THEN a ELSE least(a, 90) END
+```
 
 ### governance.fn_mask_birth_date
 

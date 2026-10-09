@@ -35,7 +35,8 @@ dbutils.widgets.text("engineer_principal", "e42fda52-f9e2-478c-b4a4-abba32a1b601
                      "Data-engineer / pipeline SP application_id")
 
 CATALOG = dbutils.widgets.get("catalog")
-TESTER = dbutils.widgets.get("coord_principal")  # coordinator SP also seeds the RLS scope
+# The coordinator SP is both a grant target (section 6) and the RLS scope seed
+# (section 2); one binding, used for both.
 COORD_SP = dbutils.widgets.get("coord_principal")
 ANALYST_SP = dbutils.widgets.get("analyst_principal")
 ENGINEER_SP = dbutils.widgets.get("engineer_principal")
@@ -77,7 +78,6 @@ def run(sql):
 
 run("CREATE SCHEMA IF NOT EXISTS governance "
     "COMMENT 'Governed consumption zone: masked, row-filtered serving tables plus RLS config and policy functions.'")
-run("DROP FUNCTION IF EXISTS governance._probe_mask")
 
 # COMMAND ----------
 
@@ -101,8 +101,8 @@ COMMENT 'Row-level security assignment map for care coordinators (lookup-driven 
 
 # Idempotent seed: the never-privileged tester SP is assigned contract H1234 only,
 # so its view of the worklist is both column-masked and row-trimmed.
-run(f"DELETE FROM governance.coordinator_scope WHERE principal = '{TESTER}'")
-run(f"INSERT INTO governance.coordinator_scope VALUES ('{TESTER}', 'H1234', current_timestamp())")
+run(f"DELETE FROM governance.coordinator_scope WHERE principal = '{COORD_SP}'")
+run(f"INSERT INTO governance.coordinator_scope VALUES ('{COORD_SP}', 'H1234', current_timestamp())")
 
 # COMMAND ----------
 
@@ -133,6 +133,17 @@ CREATE OR REPLACE FUNCTION governance.fn_mask_birth_date(bd DATE)
 RETURNS DATE
 COMMENT 'Generalized to birth year unless break-glass clinical access.'
 RETURN CASE WHEN is_member('{G_PHI}') THEN bd ELSE trunc(bd, 'YEAR') END
+""")
+
+# age: HIPAA Safe Harbor permits the birth year to remain (fn_mask_birth_date keeps
+# it), so exact age under 90 is consistent and compliant and stays useful for the
+# clinical logic (e.g. COL eligibility < 76). Safe Harbor does require ages 90+ to be
+# aggregated, so cap them at 90 for everyone except break-glass.
+run(f"""
+CREATE OR REPLACE FUNCTION governance.fn_mask_age(a INT)
+RETURNS INT
+COMMENT 'HIPAA Safe Harbor: ages 90+ aggregated to 90 unless break-glass.'
+RETURN CASE WHEN is_member('{G_PHI}') THEN a ELSE least(a, 90) END
 """)
 
 # Clinical measurements: redacted to NULL unless break-glass.
@@ -208,6 +219,7 @@ LEFT JOIN gold.measure_weights w USING (measure_id)
 
 run("ALTER TABLE governance.care_gaps ALTER COLUMN member_id SET MASK governance.fn_mask_member_id")
 run("ALTER TABLE governance.care_gaps ALTER COLUMN birth_date SET MASK governance.fn_mask_birth_date")
+run("ALTER TABLE governance.care_gaps ALTER COLUMN age SET MASK governance.fn_mask_age")
 run("ALTER TABLE governance.care_gaps ALTER COLUMN dual_eligible SET MASK governance.fn_mask_dual")
 run("ALTER TABLE governance.care_gaps SET ROW FILTER governance.fn_rls_contract ON (contract_id)")
 
@@ -268,12 +280,20 @@ tag_col("governance.care_gaps", "gap_status", "pii", "clinical")
 tag_col("governance.member_labs", "member_id", "pii", "direct_identifier")
 tag_col("governance.member_labs", "result_value", "pii", "clinical")
 
-# Source-of-truth columns on the medallion (best-effort: pipeline refreshes may
-# reset tags on managed MVs, which is why the enforced surface is the Delta zone).
-tag_col("silver.members", "member_id", "pii", "direct_identifier")
-tag_col("silver.members", "birth_date", "pii", "demographic", "date_of_birth")
-tag_col("silver.members", "dual_eligible", "pii", "socioeconomic")
-tag_col("bronze.lab_results", "result_value", "pii", "clinical")
+# Source-of-truth columns on the medallion. Best-effort and isolated: these are
+# pipeline-owned MVs/streaming tables whose tags a refresh may reset, so a failure
+# here must never abort the critical grants that follow. The enforced surface is the
+# Delta consumption zone tagged above regardless.
+for _tbl, _col, _sens, _class, _entity in [
+    ("silver.members", "member_id", "pii", "direct_identifier", None),
+    ("silver.members", "birth_date", "pii", "demographic", "date_of_birth"),
+    ("silver.members", "dual_eligible", "pii", "socioeconomic", None),
+    ("bronze.lab_results", "result_value", "pii", "clinical", None),
+]:
+    try:
+        tag_col(_tbl, _col, _sens, _class, _entity)
+    except Exception as _e:
+        print(f"  (skipped best-effort medallion tag {_tbl}.{_col}: {str(_e).splitlines()[0][:90]})")
 
 # Certify the governed serving tables.
 run("ALTER TABLE governance.care_gaps SET TAGS ('system.certification_status' = 'certified')")

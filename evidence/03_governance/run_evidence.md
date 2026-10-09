@@ -16,10 +16,14 @@ Catalog `zrb_fe_bar_uhc_stars_catalog`, applied by the `governance_job` bundle j
   materialized views and streaming tables owned by the Lakeflow pipeline, which UC
   will not let masks attach to directly, so the enforced surface is this Delta zone
   and the medallion is locked to engineers / break-glass / admin.
-- **Policy functions**: `fn_mask_member_id`, `fn_mask_birth_date`,
+- **Policy functions**: `fn_mask_member_id`, `fn_mask_birth_date`, `fn_mask_age`,
   `fn_mask_clinical`, `fn_mask_dual`, `fn_rls_contract`. Each keys on native
   `is_member()` over the persona workspace groups; the row filter also reads the
-  `coordinator_scope` lookup table.
+  `coordinator_scope` lookup table. `fn_mask_birth_date` generalizes the date of
+  birth to its year (HIPAA Safe Harbor permits the year to remain), and
+  `fn_mask_age` applies the Safe-Harbor 90-and-over aggregation. The synthetic
+  population tops out at age 90, so the age cap changes no value here; it is in place
+  for a production population that includes members over 90.
 - **Row-level security**: `governance.coordinator_scope` maps a coordinator
   principal to its assigned contracts; `fn_rls_contract` trims a coordinator to
   those contracts and leaves analysts / engineers / break-glass / admins
@@ -79,12 +83,13 @@ the coordinator's denial on `member_labs` matches the grant model.
 ## Reproduce
 
 ```
+python3 src/03_governance/01_identities.py           # groups + service principals (once)
+python3 src/03_governance/01b_mint_persona_secrets.py # SP OAuth secrets -> /tmp (never committed)
 databricks bundle deploy -t dev -p fe-vm-zrb-fe-bar-uhc-stars
 databricks bundle run governance_job -t dev -p fe-vm-zrb-fe-bar-uhc-stars
-python3 src/03_governance/03_evidence.py          # inventory evidence
-python3 src/03_governance/04_prove_enforcement.py # enforcement proof
+python3 src/03_governance/03_evidence.py             # inventory evidence
+python3 src/03_governance/04_prove_enforcement.py    # enforcement proof
 ```
 
-Identities are created once by `src/03_governance/01_identities.py`; the two
-service-principal OAuth secrets used by the proof are minted out of band and never
-committed.
+The persona service-principal OAuth secrets live under `/tmp` and are never
+committed; delete them once the proof has run.
