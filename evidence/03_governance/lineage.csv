@@ -1,0 +1,14 @@
+source_table_full_name,target_table_full_name,event_time
+zrb_fe_bar_uhc_stars_catalog.bronze.lab_results,zrb_fe_bar_uhc_stars_catalog.gold.care_gaps,2026-10-09T15:07:01.057Z
+zrb_fe_bar_uhc_stars_catalog.bronze.medical_claims,zrb_fe_bar_uhc_stars_catalog.gold.care_gaps,2026-10-09T15:07:01.057Z
+zrb_fe_bar_uhc_stars_catalog.silver.members,zrb_fe_bar_uhc_stars_catalog.gold.care_gaps,2026-10-09T15:07:01.057Z
+zrb_fe_bar_uhc_stars_catalog.silver.pdc,zrb_fe_bar_uhc_stars_catalog.gold.care_gaps,2026-10-09T15:07:01.057Z
+zrb_fe_bar_uhc_stars_catalog.gold.care_gaps,zrb_fe_bar_uhc_stars_catalog.governance.care_gaps,2026-10-09T15:41:57.908Z
+zrb_fe_bar_uhc_stars_catalog.gold.measure_weights,zrb_fe_bar_uhc_stars_catalog.governance.care_gaps,2026-10-09T15:41:57.908Z
+zrb_fe_bar_uhc_stars_catalog.silver.members,zrb_fe_bar_uhc_stars_catalog.governance.care_gaps,2026-10-09T15:41:57.908Z
+zrb_fe_bar_uhc_stars_catalog.bronze.lab_results,zrb_fe_bar_uhc_stars_catalog.governance.member_labs,2026-10-09T15:42:08.364Z
+zrb_fe_bar_uhc_stars_catalog.silver.members,zrb_fe_bar_uhc_stars_catalog.governance.member_labs,2026-10-09T15:42:08.364Z
+zrb_fe_bar_uhc_stars_catalog.bronze.medical_claims,zrb_fe_bar_uhc_stars_catalog.silver.members,2026-10-09T15:06:56.182Z
+zrb_fe_bar_uhc_stars_catalog.bronze.member_roster,zrb_fe_bar_uhc_stars_catalog.silver.members,2026-10-09T15:06:56.182Z
+zrb_fe_bar_uhc_stars_catalog.bronze.pharmacy_fills,zrb_fe_bar_uhc_stars_catalog.silver.pdc,2026-10-09T15:06:55.494Z
+zrb_fe_bar_uhc_stars_catalog.bronze.outreach_history,zrb_fe_bar_uhc_stars_catalog.silver.prior_outreach,2026-10-09T15:06:52.299Z

@@ -5,6 +5,15 @@ variables:
   catalog:
     description: Unity Catalog catalog for all layers (pre-provisioned for the workspace).
     default: zrb_fe_bar_uhc_stars_catalog
+  coord_principal:
+    description: application_id of the care-coordinator service principal (Layer 3 grant target, RLS scope seed, enforcement proof).
+    default: 07369d4b-134b-42bb-b2aa-25c57456404d
+  analyst_principal:
+    description: application_id of the quality-analyst service principal (Layer 3 grant target + enforcement proof).
+    default: 9490fdb4-1a5e-42eb-b5a6-4ecab7d48337
+  engineer_principal:
+    description: application_id of the data-engineer / pipeline service principal (Layer 3 medallion grant target).
+    default: e42fda52-f9e2-478c-b4a4-abba32a1b601
 
 include:
   - resources/*.yml

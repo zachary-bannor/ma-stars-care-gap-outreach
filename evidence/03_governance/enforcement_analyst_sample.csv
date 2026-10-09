@@ -1,0 +1,6 @@
+member_id,contract_id,measure_id,gap_status,birth_date,age,dual_eligible
+9d62e54d6f4aa1f372545ddcf5a73db691fc6afd3395da7a1b6025d87adfb193,H5678,EED,closed,1961-01-01,65,true
+ff94634f41e363dfd5d4a1a0d3a2014bfe5e10d8a1599c5ee4530584f5eff7ae,H1234,EED,closed,1961-01-01,65,false
+23f6b4dd91d92eedf602920097da695204dcc690acf0061bd1d6cc67dde740aa,H5678,EED,closed,1961-01-01,65,false
+4a5812dff9a92fa038f280bd186934596620cbc6f2f8c8743156bdeb5dd28af0,H5678,EED,closed,1961-01-01,65,false
+1bd5dce434a70de92d3e8ab085817579a65ddb32c06838b7ed617a13483446e5,H5678,EED,closed,1961-01-01,65,false

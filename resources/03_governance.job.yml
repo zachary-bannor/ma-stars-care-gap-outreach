@@ -1,0 +1,15 @@
+resources:
+  jobs:
+    governance_job:
+      name: "[${bundle.target}] MA Stars - 03 Unity Catalog governance"
+      tasks:
+        - task_key: apply_governance
+          notebook_task:
+            notebook_path: ../src/03_governance/02_apply_governance.py
+            base_parameters:
+              catalog: ${var.catalog}
+              coord_principal: ${var.coord_principal}
+              analyst_principal: ${var.analyst_principal}
+              engineer_principal: ${var.engineer_principal}
+      queue:
+        enabled: true

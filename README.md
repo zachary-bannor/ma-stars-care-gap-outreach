@@ -41,8 +41,8 @@ One connected journey, raw files to a worklist a coordinator actually works. The
 | Layer | What it does | Status |
 | --- | --- | --- |
 | 1. Data generation | Seeded synthetic senior MA population, raw source files landed in a volume | Built |
-| 2. Lakeflow pipeline | Auto Loader + DLT, bronze to gold, re-derives HEDIS gaps with data-quality expectations | Planned |
-| 3. Unity Catalog governance | Column masks, row filter by assigned contract, PHI tags, lineage | Planned |
+| 2. Lakeflow pipeline | Auto Loader + DLT, bronze to gold, re-derives HEDIS gaps with data-quality expectations | Built |
+| 3. Unity Catalog governance | Governed consumption zone with column masks + contract row filter, least-privilege grants, PHI classification tags, lineage, three-persona enforcement proof | Built |
 | 4. ML propensity model | Gradient-boosted propensity-to-close, MLflow tracked, UC registered, batch scored | Planned |
 | 5. GenAI drafting | Foundation Model endpoint via Unity AI Gateway, drafts outreach + reason note | Planned |
 | 6. Lakebase worklist | Managed Postgres serving the ranked worklist with transactional write-back | Planned |
@@ -66,7 +66,7 @@ Layer 1 creates schemas `bronze`, `silver`, `gold`, `ops` inside the target cata
 
 ## Evidence, as text
 
-Execution evidence lives in `evidence/`, one folder per layer, committed as text. No screenshots stand in for a run. Each notebook writes its own run evidence: row counts, prevalence checks, model metrics, sample query output. Layer 1 evidence (row counts, prevalence, intended open-gap counts, sample rows) is in `evidence/01_data_generation/`.
+Execution evidence lives in `evidence/`, one folder per layer, committed as text. No screenshots stand in for a run. Each notebook writes its own run evidence: row counts, prevalence checks, model metrics, sample query output. Layer 1 evidence (row counts, prevalence, intended open-gap counts, sample rows) is in `evidence/01_data_generation/`. Layer 2 evidence (the gap re-derivation reproducing Layer 1's 67,202 open gaps exactly, with all data-quality expectations passing) is in `evidence/02_lakeflow_pipeline/`. Layer 3 evidence (grant inventory, 38 classification tags, the applied mask and row-filter DDL, lineage, and a three-persona enforcement proof run under real principals) is in `evidence/03_governance/`.
 
 ## Decisions and trade-offs
 

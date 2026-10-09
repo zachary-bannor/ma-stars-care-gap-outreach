@@ -1,0 +1,3 @@
+result
+"DENIED: [INSUFFICIENT_PERMISSIONS] Insufficient privileges:
+User does not have SELECT on Table 'zrb_fe_bar_uhc_stars_catalog.governance.member_labs'. SQLSTATE: 42501"

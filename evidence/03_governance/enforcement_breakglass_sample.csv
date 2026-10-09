@@ -1,0 +1,6 @@
+member_id,contract_id,measure_id,gap_status,birth_date,age,dual_eligible
+M00090159,H5678,EED,closed,1961-08-25,65,true
+M00042497,H1234,EED,closed,1961-03-27,65,false
+M00059278,H5678,EED,closed,1961-01-21,65,false
+M00071076,H5678,EED,closed,1961-01-13,65,false
+M00001483,H5678,EED,closed,1961-04-15,65,false
