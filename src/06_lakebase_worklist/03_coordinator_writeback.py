@@ -82,6 +82,20 @@ def coord_connection():
                            autocommit=False)
 
 
+def admin_reset(member_id):
+    """Clear any prior proof rows for this member (as admin), so each run is one
+    clean, idempotent proof. The coordinator role cannot DELETE (by design), so
+    the reset must run as the admin owner."""
+    inst = admin.database.get_database_instance(name=INSTANCE)
+    cred = admin.database.generate_database_credential(instance_names=[INSTANCE])
+    me = admin.current_user.me().user_name
+    with psycopg.connect(host=inst.read_write_dns, port=5432, dbname=LOGICAL_DB,
+                         user=me, password=cred.token, sslmode="require",
+                         autocommit=True) as ac, ac.cursor() as c:
+        c.execute(f"DELETE FROM {PG_SCHEMA}.coordinator_action WHERE member_id = %s", (member_id,))
+        c.execute(f"DELETE FROM {PG_SCHEMA}.worklist_status WHERE member_id = %s", (member_id,))
+
+
 print("=== connecting to Lakebase as the care-coordinator service principal ===")
 conn = coord_connection()
 log = []  # (step, detail)
@@ -99,12 +113,18 @@ with conn.cursor() as cur:
     cur.execute(f"SELECT member_id, worklist_rank, lead_measure, lead_confidence, "
                 f"bundle_decision, bundle_measure, preferred_channel "
                 f"FROM {PG_SCHEMA}.worklist ORDER BY worklist_rank LIMIT 1")
-    m, rank, lead, conf, bundle, bundle_m, channel = cur.fetchone()
+    row = cur.fetchone()
+    if row is None:
+        sys.exit("ops.worklist is empty; run 01 (build worklist) and 02 (sync) first.")
+    m, rank, lead, conf, bundle, bundle_m, channel = row
     print(f"\n1. top worklist item: #{rank} member={m} lead={lead}@{conf} "
           f"bundle={bundle}({bundle_m}) channel={channel}")
     log.append(("point_read", f"member={m} rank={rank} lead={lead} conf={conf} "
                               f"bundle={bundle} bundle_measure={bundle_m}"))
 
+    # idempotency: start this member from a clean slate (admin-side reset)
+    conn.rollback()        # end the read transaction before the external reset
+    admin_reset(m)
     before = status_of(cur, m)
     print(f"   status before: {before}")
     log.append(("status_before", json.dumps(before)))

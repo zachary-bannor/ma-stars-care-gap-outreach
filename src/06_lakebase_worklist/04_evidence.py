@@ -71,18 +71,19 @@ _, dist = q(f"SELECT lead_measure, COUNT(*) c, ROUND(AVG(lead_confidence),3) mc 
             f"FROM {WORKLIST} GROUP BY lead_measure ORDER BY c DESC")
 lead_dist = {r[0]: {"members": int(r[1]), "mean_confidence": float(r[2])} for r in dist}
 
-# members whose ai_decide lead differs from the pure top-EV gap (the judgment EV
-# does not make): join to the per-member highest-EV measure.
+# members where ai_decide led with a STRICTLY LOWER-EV ask than the member's best
+# available gap (the judgment EV does not make). Numeric so EV ties never count as
+# divergence; contract-scoped. The evidence shows the EV actually traded.
 div_sql = f"""
   WITH topev AS (
-    SELECT member_id, measure_id AS top_ev_measure FROM (
-      SELECT member_id, measure_id,
-             ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY expected_weighted_value DESC) rn
-      FROM {CATALOG}.gold.gap_scores) WHERE rn = 1)
-  SELECT w.worklist_rank, w.member_id, w.lead_measure, t.top_ev_measure,
+    SELECT member_id, ROUND(MAX(expected_weighted_value), 4) AS top_ev
+    FROM {CATALOG}.gold.gap_scores
+    WHERE contract_id IN (SELECT DISTINCT contract_id FROM {WORKLIST})
+    GROUP BY member_id)
+  SELECT w.worklist_rank, w.member_id, w.lead_measure, w.lead_ev, t.top_ev,
          w.lead_confidence, w.lead_probabilities
   FROM {WORKLIST} w JOIN topev t USING (member_id)
-  WHERE w.lead_measure <> t.top_ev_measure
+  WHERE w.lead_ev < t.top_ev
   ORDER BY w.worklist_rank"""
 div_cols, div_rows = q(div_sql)
 
@@ -132,7 +133,7 @@ summary = {
         "decide_errors": int(errors),
         "bundle_rate": float(bundle_rate),
         "lead_measure_distribution": lead_dist,
-        "sequencing_divergence_vs_top_ev": len(div_rows),
+        "led_with_lower_ev_ask": len(div_rows),
     },
     "drafts_attached": int(with_draft),
     "writeback_roundtrip": {"actions_in_uc": writeback_actions,
@@ -165,14 +166,15 @@ with open(md, "w") as f:
     f.write(f"| bundle rate | {bundle_rate} |\n")
     f.write(f"| out-of-set fallbacks | {fallbacks} |\n")
     f.write(f"| ai_decide errors | {errors} |\n")
-    f.write(f"| lead differs from pure top-EV | {len(div_rows)} members |\n")
+    f.write(f"| led with a lower-EV ask than best available | {len(div_rows)} members |\n")
     f.write(f"| drafts attached (Layer 5 segments) | {with_draft} / {members} |\n\n")
     f.write("Lead-measure distribution: ")
     f.write(", ".join(f"{k} {v['members']}" for k, v in lead_dist.items()) + ".\n")
     f.write("MAD leads the top of the worklist because the highest-EV members carry the "
-            "triple-weighted adherence gap; the sequencing diverges from pure EV where an "
-            "easier or channel-fit ask is the better first contact "
-            f"({len(div_rows)} members, see sequencing_divergence.csv).\n\n")
+            "triple-weighted adherence gap; in "
+            f"{len(div_rows)} members ai_decide led with a strictly lower-EV ask where an "
+            "easier or channel-fit first contact was the better sequencing call "
+            "(see sequencing_divergence.csv, which shows the EV traded).\n\n")
     f.write("## Governed posture\n\n")
     f.write("The worklist projection is column-minimized to coordinator-entitled fields "
             "(member_id cleartext, EV, measures, propensity, channel, tenure, lead decision, "

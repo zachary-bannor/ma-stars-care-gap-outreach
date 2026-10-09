@@ -90,15 +90,13 @@ def questions_json():
     return json.dumps(build_questions())
 
 
-def segment_key(measure_id, channel, tenure):
-    """Layer 5 draft segment key: measure|channel|tenure (identical derivation)."""
-    return f"{measure_id}|{channel}|{tenure}"
-
-
 def parse_decision(raw):
-    """Parse the ai_decide VARIANT/JSON string into the fields the worklist and
-    the evidence keep. Safety-critical and defensive: a malformed or error
-    response yields Nones and the error message, never an exception."""
+    """Reference parser for the ai_decide response: the single documented spec of
+    the response shape that build_select_sql extracts inline (via the VARIANT
+    `decision:response:answers:...` paths). Safety-critical and defensive: a
+    malformed or error response yields Nones and the error message, never an
+    exception. Pinned by tests so the extracted contract is enforced; if the
+    ai_decide response shape changes, update both this and build_select_sql."""
     import json
     try:
         d = json.loads(raw) if isinstance(raw, str) else (raw or {})

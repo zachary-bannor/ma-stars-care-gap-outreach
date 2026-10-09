@@ -12,7 +12,8 @@ parser and the fixed-questions builder are pinned here:
     bundle options, and serialize to valid JSON.
   - _sql_str / build_select_sql: the literal escaping and the overall SQL shape
     that the build depends on (balanced quotes and parentheses, the fixed
-    questions passed as a literal, the fallback and bundle logic present).
+    questions passed as a literal, the fallback and bundle logic present, and no
+    PHI column in the projection).
 
 Runs with pytest, or directly: `python3 tests/test_worklist_sql.py`.
 """
@@ -116,10 +117,6 @@ def test_build_select_sql_shape():
 def test_create_table_wrapper():
     ct = worklist_sql.build_create_table_sql("cat", "H1234", 500)
     assert ct.startswith("CREATE OR REPLACE TABLE cat.ops.member_worklist AS")
-
-
-def test_segment_key_matches_layer5():
-    assert worklist_sql.segment_key("MAD", "digital", "longtime") == "MAD|digital|longtime"
 
 
 if __name__ == "__main__":

@@ -142,22 +142,29 @@ with conn.cursor() as cur:
     print("· write-back tables ready (ops.worklist_status, ops.coordinator_action)")
 
     # Grant to the persona PG roles (discover exact role names the mapping made).
+    # The identity->Postgres role mapping from step 2 can lag; if a role is not
+    # visible yet, skip its grants with a clear message rather than GRANT to a
+    # non-existent role (which would abort setup after the costly instance create).
     cur.execute("SELECT rolname FROM pg_roles")
     roles = {r[0] for r in cur.fetchall()}
-    coord_role = next((r for r in roles if COORD_SP in r), COORD_SP)
-    analyst_role = next((r for r in roles if ANALYST_SP in r), ANALYST_SP)
+    coord_role = next((r for r in roles if COORD_SP in r), None)
+    analyst_role = next((r for r in roles if ANALYST_SP in r), None)
     print(f"· coordinator role -> {coord_role}")
     print(f"· analyst role     -> {analyst_role}")
 
-    for role in (coord_role, analyst_role):
-        cur.execute(f'GRANT USAGE ON SCHEMA {PG_SCHEMA} TO "{role}"')
-    # Coordinator: write the operational log + status.
-    cur.execute(f'GRANT SELECT, INSERT, UPDATE ON {PG_SCHEMA}.worklist_status TO "{coord_role}"')
-    cur.execute(f'GRANT SELECT, INSERT ON {PG_SCHEMA}.coordinator_action TO "{coord_role}"')
-    cur.execute(f'GRANT USAGE ON ALL SEQUENCES IN SCHEMA {PG_SCHEMA} TO "{coord_role}"')
-    # Analyst: read-only on operational state.
-    cur.execute(f'GRANT SELECT ON {PG_SCHEMA}.worklist_status TO "{analyst_role}"')
-    cur.execute(f'GRANT SELECT ON {PG_SCHEMA}.coordinator_action TO "{analyst_role}"')
+    if coord_role:
+        cur.execute(f'GRANT USAGE ON SCHEMA {PG_SCHEMA} TO "{coord_role}"')
+        cur.execute(f'GRANT SELECT, INSERT, UPDATE ON {PG_SCHEMA}.worklist_status TO "{coord_role}"')
+        cur.execute(f'GRANT SELECT, INSERT ON {PG_SCHEMA}.coordinator_action TO "{coord_role}"')
+        cur.execute(f'GRANT USAGE ON ALL SEQUENCES IN SCHEMA {PG_SCHEMA} TO "{coord_role}"')
+    else:
+        print("! coordinator PG role not visible yet; re-run after role propagation to grant it")
+    if analyst_role:
+        cur.execute(f'GRANT USAGE ON SCHEMA {PG_SCHEMA} TO "{analyst_role}"')
+        cur.execute(f'GRANT SELECT ON {PG_SCHEMA}.worklist_status TO "{analyst_role}"')
+        cur.execute(f'GRANT SELECT ON {PG_SCHEMA}.coordinator_action TO "{analyst_role}"')
+    else:
+        print("! analyst PG role not visible yet; re-run after role propagation to grant it")
     print("· least-privilege grants applied (coordinator read+write, analyst read-only)")
 
 conn.close()

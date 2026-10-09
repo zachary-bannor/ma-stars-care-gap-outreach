@@ -45,7 +45,7 @@
         "mean_confidence": 0.403
       }
     },
-    "sequencing_divergence_vs_top_ev": 6
+    "led_with_lower_ev_ask": 5
   },
   "drafts_attached": 249,
   "writeback_roundtrip": {

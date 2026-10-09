@@ -91,19 +91,23 @@ print(f"built {CATALOG}.ops.member_worklist (top {TOP_N} members on {CONTRACT})"
 
 # COMMAND ----------
 
+# lead_below_top_ev counts members where ai_decide led with a STRICTLY lower-EV
+# ask than their best available gap. Numeric and contract-scoped, so EV ties are
+# never miscounted as divergence.
 stats = spark.sql(f"""
+  WITH topev AS (
+    SELECT member_id, ROUND(MAX(expected_weighted_value), 4) AS top_ev
+    FROM {CATALOG}.gold.gap_scores
+    WHERE contract_id = '{CONTRACT}' GROUP BY member_id)
   SELECT COUNT(*) AS members,
-         SUM(open_gap_count) AS open_gaps_in_worklist,
-         ROUND(AVG(lead_confidence), 3) AS mean_lead_confidence,
-         ROUND(AVG(CASE WHEN bundle_decision = 'bundle' THEN 1 ELSE 0 END), 3) AS bundle_rate,
-         ROUND(AVG(CASE WHEN lead_measure = (
-             SELECT measure_id FROM {CATALOG}.gold.gap_scores s
-             WHERE s.member_id = w.member_id
-             ORDER BY expected_weighted_value DESC LIMIT 1) THEN 1 ELSE 0 END), 3)
-             AS lead_equals_top_ev_rate,
-         SUM(CASE WHEN draft_subject IS NULL THEN 1 ELSE 0 END) AS members_without_draft,
-         SUM(CASE WHEN decide_error IS NOT NULL THEN 1 ELSE 0 END) AS decide_errors
-  FROM {CATALOG}.ops.member_worklist w
+         SUM(w.open_gap_count) AS open_gaps_in_worklist,
+         ROUND(AVG(w.lead_confidence), 3) AS mean_lead_confidence,
+         ROUND(AVG(CASE WHEN w.bundle_decision = 'bundle' THEN 1 ELSE 0 END), 3) AS bundle_rate,
+         SUM(CASE WHEN w.lead_ev < t.top_ev THEN 1 ELSE 0 END) AS lead_below_top_ev,
+         SUM(CAST(w.lead_fallback_applied AS INT)) AS out_of_set_fallbacks,
+         SUM(CASE WHEN w.draft_subject IS NULL THEN 1 ELSE 0 END) AS members_without_draft,
+         SUM(CASE WHEN w.decide_error IS NOT NULL THEN 1 ELSE 0 END) AS decide_errors
+  FROM {CATALOG}.ops.member_worklist w JOIN topev t USING (member_id)
 """).collect()[0]
 print(stats)
 

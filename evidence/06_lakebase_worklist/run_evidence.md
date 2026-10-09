@@ -14,11 +14,11 @@ The worklist holds the top 500 members by `member_ev` (sum of their open-gap exp
 | bundle rate | 0.894 |
 | out-of-set fallbacks | 0 |
 | ai_decide errors | 0 |
-| lead differs from pure top-EV | 6 members |
+| led with a lower-EV ask than best available | 5 members |
 | drafts attached (Layer 5 segments) | 249 / 500 |
 
 Lead-measure distribution: MAD 486, COL 6, CBP 5, GSD 3.
-MAD leads the top of the worklist because the highest-EV members carry the triple-weighted adherence gap; the sequencing diverges from pure EV where an easier or channel-fit ask is the better first contact (6 members, see sequencing_divergence.csv).
+MAD leads the top of the worklist because the highest-EV members carry the triple-weighted adherence gap; in 5 members ai_decide led with a strictly lower-EV ask where an easier or channel-fit first contact was the better sequencing call (see sequencing_divergence.csv, which shows the EV traded).
 
 ## Governed posture
 
