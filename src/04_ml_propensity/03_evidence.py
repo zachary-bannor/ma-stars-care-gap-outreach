@@ -112,6 +112,13 @@ imp_cols, imp_rows = q("""SELECT feature, ROUND(gain, 4), ROUND(permutation_impo
 cal_cols, cal_rows = q("""SELECT bin, ROUND(mean_pred, 4), ROUND(frac_pos, 4), n
                           FROM gold.gap_scores_calibration ORDER BY bin""")
 m = metrics
+# None-safe 4dp formatter: a renamed or missing metric degrades to "n/a" instead
+# of throwing mid-generation and leaving the evidence directory half-written.
+def f4(key):
+    v = metrics.get(key)
+    return f"{v:.4f}" if isinstance(v, (int, float)) else "n/a"
+
+
 narr = f"""# Layer 4 / ML propensity: run evidence
 
 Gradient-boosted model (XGBoost) for P(member closes an open gap | contacted),
@@ -128,21 +135,26 @@ features. The prior-closure-rate feature is built leave-one-out (a row's own
 outcome is removed from its own feature) and the split is by member, so no
 outcome leaks into training or across the test boundary.
 
-The recovered-not-cheated proof is the feature importance below: tenure, digital
-channel, distance, dual status, and the prior-closure-rate proxy carry the
-signal, exactly the drivers Layer 1 used; age and the condition flags, which
-Layer 1 never tied to closure, come back near zero.
+The recovered-not-cheated proof is the feature importance below. The signal
+concentrates on the levers Layer 1 actually used: digital channel on file is the
+dominant driver, member tenure and distance to provider add clear secondary
+signal, and dual status and the prior-closure-rate proxy are weak but
+directionally present. The features Layer 1 never tied to closure (age, the
+condition flags, the prior attempt count) sit at the noise floor, at or just
+below zero permutation importance. A model reading the latent probability
+directly would score near-perfect; this one lands at the honest ceiling for the
+stochastic label.
 
 ## Held-out test metrics (fully held-out, split by member)
 
 | metric | value |
 | --- | --- |
-| ROC-AUC | {m.get('test_roc_auc'):.4f} |
-| PR-AUC | {m.get('test_pr_auc'):.4f} |
-| log loss | {m.get('test_log_loss'):.4f} |
-| Brier (raw) | {m.get('test_brier_raw'):.4f} |
-| Brier (calibrated) | {m.get('test_brier_calibrated'):.4f} |
-| base rate | {m.get('test_base_rate'):.4f} |
+| ROC-AUC | {f4('test_roc_auc')} |
+| PR-AUC | {f4('test_pr_auc')} |
+| log loss | {f4('test_log_loss')} |
+| Brier (raw) | {f4('test_brier_raw')} |
+| Brier (calibrated) | {f4('test_brier_calibrated')} |
+| base rate | {f4('test_base_rate')} |
 | train / val / test rows | {int(m.get('n_train_rows',0)):,} / {int(m.get('n_val_rows',0)):,} / {int(m.get('n_test_rows',0)):,} |
 
 ROC-AUC in the mid-0.6s is the honest ceiling here, not a weak model. Layer 1
@@ -153,10 +165,9 @@ instead recovered the true drivers (feature importance below), which is what a
 leakage-free fit looks like.
 
 The raw gradient-boosted scores are already well-calibrated (Brier
-{m.get('test_brier_raw'):.4f}); isotonic calibration holds Brier at
-{m.get('test_brier_calibrated'):.4f} and the reliability bins below track the
-diagonal, so the expected-value ranking multiplies a probability that means what
-it says.
+{f4('test_brier_raw')}); isotonic calibration holds Brier at
+{f4('test_brier_calibrated')} and the reliability bins below track the diagonal,
+so the expected-value ranking multiplies a probability that means what it says.
 
 ## Feature importance
 

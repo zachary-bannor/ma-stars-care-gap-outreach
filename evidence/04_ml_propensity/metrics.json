@@ -1,5 +1,5 @@
 {
-  "model_version": "2",
+  "model_version": "3",
   "metrics": {
     "n_test_members": 11934.0,
     "n_test_rows": 18182.0,
@@ -7,10 +7,10 @@
     "n_train_rows": 53996.0,
     "n_val_rows": 18072.0,
     "test_base_rate": 0.5393246067539325,
-    "test_brier_calibrated": 0.23197180087658245,
-    "test_brier_raw": 0.23166335405599842,
-    "test_log_loss": 0.6567704569686138,
-    "test_pr_auc": 0.661338373064798,
-    "test_roc_auc": 0.648851599979429
+    "test_brier_calibrated": 0.23191523181801696,
+    "test_brier_raw": 0.23175351035164862,
+    "test_log_loss": 0.6559130169778932,
+    "test_pr_auc": 0.6607202442832144,
+    "test_roc_auc": 0.6484294172758585
   }
 }

@@ -105,6 +105,14 @@ scored = (
 
 # COMMAND ----------
 
+# The weights table is a left join, so a measure with no Star weight would score a
+# valid propensity but a NULL expected value and silently sink out of the ranked
+# worklist. Fail loudly instead; every scored measure must carry a weight.
+missing = [r.measure_id for r in
+           scored.filter(F.col("star_weight").isNull()).select("measure_id").distinct().collect()]
+if missing:
+    raise ValueError(f"measures missing a Star weight in gold.measure_weights: {missing}")
+
 (
     scored.write.mode("overwrite")
     .option("overwriteSchema", "true")
