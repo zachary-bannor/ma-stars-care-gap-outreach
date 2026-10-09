@@ -1,0 +1,39 @@
+{
+  "model_version": "2",
+  "scored_open_gaps": 67202,
+  "mean_propensity": 0.536,
+  "test_roc_auc": 0.648851599979429,
+  "test_brier_calibrated": 0.23197180087658245,
+  "by_measure": [
+    {
+      "measure_id": "CBP",
+      "gaps": 25874,
+      "avg_propensity": 0.5387,
+      "avg_expected_value": 0.5387
+    },
+    {
+      "measure_id": "COL",
+      "gaps": 19313,
+      "avg_propensity": 0.5391,
+      "avg_expected_value": 0.5391
+    },
+    {
+      "measure_id": "EED",
+      "gaps": 9827,
+      "avg_propensity": 0.543,
+      "avg_expected_value": 0.543
+    },
+    {
+      "measure_id": "GSD",
+      "gaps": 5835,
+      "avg_propensity": 0.5467,
+      "avg_expected_value": 0.5467
+    },
+    {
+      "measure_id": "MAD",
+      "gaps": 6353,
+      "avg_propensity": 0.4951,
+      "avg_expected_value": 1.4854
+    }
+  ]
+}

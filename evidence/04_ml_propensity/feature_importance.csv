@@ -1,0 +1,15 @@
+feature,gain,permutation_importance
+digital_channel_on_file,0.6765,0.0843
+tenure_months,0.0438,0.0276
+distance_to_provider_miles,0.0411,0.0232
+dual_eligible,0.0502,0.0039
+prior_closure_rate_smoothed,0.0284,0.0028
+measure_MAD,0.0355,0.0016
+measure_EED,0.0132,1.0E-4
+measure_CBP,0.0166,0.0
+is_diabetic,0.0153,0.0
+measure_COL,0.0124,-1.0E-4
+measure_GSD,0.0157,-2.0E-4
+prior_attempts,0.0179,-3.0E-4
+is_hypertensive,0.0158,-3.0E-4
+age,0.0176,-4.0E-4

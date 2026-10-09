@@ -1,0 +1,31 @@
+resources:
+  jobs:
+    ml_propensity_job:
+      name: "[${bundle.target}] MA Stars - 04 ML propensity"
+      # Production target-state: run_as the engineer / pipeline service principal
+      # (var.engineer_principal), which owns the medallion writes. That is left
+      # commented because binding run_as to a service principal needs the
+      # servicePrincipal.user role on it, and this sandbox identity is a workspace
+      # admin, not an account admin (same account-admin limit documented in Layer
+      # 3). The job therefore runs as the workspace admin, a strict superset of the
+      # engineer SP's grants. The engineer SP genuinely holds exactly what the job
+      # needs, no more: USE SCHEMA/SELECT/MODIFY on the medallion (Layer 3) plus
+      # USE CATALOG + CREATE TABLE + CREATE MODEL on gold (04_setup_grants.py), so
+      # swapping run_as to the SP in a production account is a one-line change.
+      # run_as:
+      #   service_principal_name: ${var.engineer_principal}
+      tasks:
+        - task_key: train_register
+          notebook_task:
+            notebook_path: ../src/04_ml_propensity/01_train_register.py
+            base_parameters:
+              catalog: ${var.catalog}
+        - task_key: score_gaps
+          depends_on:
+            - task_key: train_register
+          notebook_task:
+            notebook_path: ../src/04_ml_propensity/02_score_gaps.py
+            base_parameters:
+              catalog: ${var.catalog}
+      queue:
+        enabled: true

@@ -1,0 +1,16 @@
+{
+  "model_version": "2",
+  "metrics": {
+    "n_test_members": 11934.0,
+    "n_test_rows": 18182.0,
+    "n_train_members": 35799.0,
+    "n_train_rows": 53996.0,
+    "n_val_rows": 18072.0,
+    "test_base_rate": 0.5393246067539325,
+    "test_brier_calibrated": 0.23197180087658245,
+    "test_brier_raw": 0.23166335405599842,
+    "test_log_loss": 0.6567704569686138,
+    "test_pr_auc": 0.661338373064798,
+    "test_roc_auc": 0.648851599979429
+  }
+}
