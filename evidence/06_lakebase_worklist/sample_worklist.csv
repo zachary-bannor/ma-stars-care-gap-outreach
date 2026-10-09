@@ -1,0 +1,26 @@
+worklist_rank,member_id,member_ev,open_gap_count,lead_measure,lead_measure_name,lead_ev,lead_propensity,lead_confidence,bundle_decision,bundle_measure,preferred_channel,tenure_band,has_draft
+1,M00075709,5.0708,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.4286,0.8095,0.94,bundle,CBP,digital,longtime,true
+2,M00060167,4.9149,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.2727,0.7576,0.92,bundle,CBP,digital,longtime,true
+3,M00060044,4.6225,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.1939,0.7313,0.42,bundle,CBP,digital,longtime,true
+4,M00063783,4.6225,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.1939,0.7313,0.91,bundle,CBP,digital,longtime,true
+5,M00074936,4.6086,5,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.882,0.6273,0.94,single,,mail_phone,longtime,true
+6,M00083142,4.6086,5,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.882,0.6273,0.94,bundle,CBP,digital,established,false
+7,M00025645,4.569,5,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.8424,0.6141,0.94,bundle,CBP,digital,established,false
+8,M00083345,4.2972,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.045,0.6817,0.92,bundle,CBP,digital,longtime,true
+9,M00032184,4.2563,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.045,0.6817,0.94,bundle,CBP,digital,established,false
+10,M00034694,4.2563,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.045,0.6817,0.91,bundle,CBP,digital,established,false
+11,M00068991,4.2563,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.045,0.6817,0.94,bundle,CBP,digital,longtime,true
+12,M00058850,4.2551,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.0438,0.6813,0.93,bundle,COL,digital,longtime,true
+13,M00077315,4.2551,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.0438,0.6813,0.9,bundle,CBP,digital,longtime,true
+14,M00060981,4.2378,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.0438,0.6813,0.94,bundle,CBP,digital,longtime,true
+15,M00057623,4.2049,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.045,0.6817,0.94,bundle,GSD,digital,longtime,true
+16,M00047146,4.19,3,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.4286,0.8095,0.88,bundle,CBP,digital,longtime,true
+17,M00077822,4.1734,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.9795,0.6598,0.94,bundle,CBP,digital,longtime,true
+18,M00095064,4.1615,3,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.4,0.8,0.94,bundle,CBP,digital,longtime,true
+19,M00082646,4.0759,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.882,0.6273,0.92,bundle,COL,digital,longtime,true
+20,M00010468,4.0375,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.9925,0.6642,0.94,bundle,CBP,digital,longtime,true
+21,M00004216,3.9922,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.882,0.6273,0.88,bundle,COL,digital,longtime,true
+22,M00001834,3.9728,3,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.2113,0.7371,0.91,bundle,CBP,digital,longtime,true
+23,M00066114,3.9728,3,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",2.2113,0.7371,0.91,bundle,CBP,digital,longtime,true
+24,M00034874,3.9596,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.882,0.6273,0.82,bundle,CBP,digital,longtime,true
+25,M00040020,3.9596,4,MAD,"Medication adherence for diabetes (MAD, triple-weighted)",1.882,0.6273,0.85,single,,mail_phone,longtime,true

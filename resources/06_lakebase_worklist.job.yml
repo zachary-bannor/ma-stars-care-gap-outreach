@@ -1,0 +1,24 @@
+resources:
+  jobs:
+    lakebase_worklist_job:
+      name: "[${bundle.target}] MA Stars - 06 Lakebase worklist build"
+      # Production target-state: run_as the engineer / pipeline service principal
+      # (var.engineer_principal). It reads gold.gap_scores + silver.members and
+      # writes ops.member_worklist (the source for the Lakebase synced table).
+      # Left commented for the same account-admin limit documented in Layers 3-5:
+      # binding run_as to a service principal needs the servicePrincipal.user role
+      # this workspace-admin-not-account-admin identity cannot assign, so the job
+      # runs as the workspace admin (a strict superset of the SP's grants) and
+      # swapping to the SP in a production account is a one-line change.
+      # run_as:
+      #   service_principal_name: ${var.engineer_principal}
+      tasks:
+        - task_key: build_worklist
+          notebook_task:
+            notebook_path: ../src/06_lakebase_worklist/01_build_worklist.py
+            base_parameters:
+              catalog: ${var.catalog}
+              coord_contract: "H1234"
+              top_n: "500"
+      queue:
+        enabled: true

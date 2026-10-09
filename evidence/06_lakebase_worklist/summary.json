@@ -1,0 +1,55 @@
+{
+  "layer": "06_lakebase_worklist",
+  "instance": {
+    "name": "zrb-stars-worklist",
+    "capacity": "CU_1",
+    "pg_version": "PG_VERSION_16",
+    "state": "AVAILABLE"
+  },
+  "catalog": "zrb_fe_bar_uhc_stars_catalog",
+  "schema": "ops",
+  "source_table": "zrb_fe_bar_uhc_stars_catalog.ops.member_worklist",
+  "synced_table": "zrb_fe_bar_uhc_stars_catalog.ops.worklist",
+  "synced_state": "SYNCED_TABLE_ONLINE_NO_PENDING_UPDATE",
+  "writeback_tables": [
+    "ops.worklist_status",
+    "ops.coordinator_action"
+  ],
+  "contract_scope": "H1234",
+  "worklist": {
+    "members": 500,
+    "open_gaps_covered": 1565,
+    "member_ev_max": 5.0708,
+    "member_ev_min": 2.7821
+  },
+  "ai_decide": {
+    "mean_lead_confidence": 0.861,
+    "out_of_set_fallbacks": 0,
+    "decide_errors": 0,
+    "bundle_rate": 0.894,
+    "lead_measure_distribution": {
+      "MAD": {
+        "members": 486,
+        "mean_confidence": 0.875
+      },
+      "COL": {
+        "members": 6,
+        "mean_confidence": 0.313
+      },
+      "CBP": {
+        "members": 5,
+        "mean_confidence": 0.512
+      },
+      "GSD": {
+        "members": 3,
+        "mean_confidence": 0.403
+      }
+    },
+    "sequencing_divergence_vs_top_ev": 6
+  },
+  "drafts_attached": 249,
+  "writeback_roundtrip": {
+    "actions_in_uc": 1,
+    "statuses_advanced": 1
+  }
+}

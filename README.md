@@ -45,7 +45,7 @@ One connected journey, raw files to a worklist a coordinator actually works. The
 | 3. Unity Catalog governance | Governed consumption zone with column masks + contract row filter, least-privilege grants, PHI classification tags, lineage, three-persona enforcement proof | Built |
 | 4. ML propensity model | Gradient-boosted propensity-to-close, MLflow tracked, UC registered, batch scored | Built |
 | 5. GenAI drafting | Governed Unity AI Gateway endpoint (guardrails, rate limit, usage tracking) over Claude Sonnet 5.5, drafts human-review outreach with no PHI sent to the model | Built |
-| 6. Lakebase worklist | Managed Postgres serving the ranked worklist with transactional write-back | Planned |
+| 6. Lakebase worklist | Managed Postgres serving the ranked worklist with transactional write-back; ai_decide picks the per-member lead ask | Built |
 | 7. Genie space | Natural-language analytics over the gold tables for the quality manager | Planned |
 | 8. Databricks App | Coordinator worklist UI, reads Lakebase, logs outreach back | Planned |
 
@@ -64,15 +64,28 @@ databricks bundle run data_generation -t dev -p <profile>
 
 Layer 1 creates schemas `bronze`, `silver`, `gold`, `ops` inside the target catalog, generates the synthetic population, and lands raw CSV files in the `bronze.raw_landing` volume. The catalog defaults to the workspace's pre-provisioned catalog and is a bundle variable (`catalog`), so you can point it at any catalog you own. Set the `dev_mode` job parameter to `true` for a 10,000-member run while iterating.
 
+Layer 6 provisions and serves from Lakebase (managed Postgres). The worklist build runs as a bundle job; the instance setup, sync, and write-back proof run locally and need a Postgres client:
+
+```bash
+pip install "psycopg[binary]"
+python3 src/06_lakebase_worklist/00_setup_lakebase.py        # instance, roles, write-back tables (idempotent)
+databricks bundle run lakebase_worklist_job -t dev -p <profile>   # build ops.member_worklist (ai_decide lead decision)
+python3 src/06_lakebase_worklist/02_sync_to_lakebase.py      # managed synced read table ops.worklist
+python3 src/06_lakebase_worklist/03_coordinator_writeback.py # transactional write-back proof as the coordinator SP
+python3 src/06_lakebase_worklist/04_evidence.py              # committed evidence
+```
+
 ## Evidence, as text
 
-Execution evidence lives in `evidence/`, one folder per layer, committed as text. No screenshots stand in for a run. Each notebook writes its own run evidence: row counts, prevalence checks, model metrics, sample query output. Layer 1 evidence (row counts, prevalence, intended open-gap counts, sample rows) is in `evidence/01_data_generation/`. Layer 2 evidence (the gap re-derivation reproducing Layer 1's 67,202 open gaps exactly, with all data-quality expectations passing) is in `evidence/02_lakeflow_pipeline/`. Layer 3 evidence (grant inventory, 38 classification tags, the applied mask and row-filter DDL, lineage, and a three-persona enforcement proof run under real principals) is in `evidence/03_governance/`.
+Execution evidence lives in `evidence/`, one folder per layer, committed as text. No screenshots stand in for a run. Each notebook writes its own run evidence: row counts, prevalence checks, model metrics, sample query output. Layer 1 evidence (row counts, prevalence, intended open-gap counts, sample rows) is in `evidence/01_data_generation/`. Layer 2 evidence (the gap re-derivation reproducing Layer 1's 67,202 open gaps exactly, with all data-quality expectations passing) is in `evidence/02_lakeflow_pipeline/`. Layer 3 evidence (grant inventory, 38 classification tags, the applied mask and row-filter DDL, lineage, and a three-persona enforcement proof run under real principals) is in `evidence/03_governance/`. Layer 4 evidence (model metrics, calibration, feature importance, sample gap scores) is in `evidence/04_ml_propensity/`. Layer 5 evidence (gateway config, prompt, sample drafts across all five measures, inference log) is in `evidence/05_genai_drafting/`. Layer 6 evidence (the worklist with the materialized ai_decide lead decision plus confidence and probabilities, the members where sequencing diverges from pure EV, and the transactional write-back proof under the coordinator service principal) is in `evidence/06_lakebase_worklist/`.
 
 ## Decisions and trade-offs
 
 **Streaming claims, batch labs.** Gap value decays with staleness, so claims and pharmacy fills land as monthly files and ingest as streaming/append tables. Labs and roster change slowly, so batch is fine. Freshness where it pays, simplicity where it does not.
 
-**Lakebase instead of serving gold directly.** The coordinator worklist is transactional: single-row reads and outreach write-back. Pushing that onto an analytics gold table means slow lookups and no clean write path. Lakebase is the right tool and the clearest reason-to-exist in the build.
+**Lakebase instead of serving gold directly.** The coordinator worklist is transactional: single-row reads and outreach write-back. Pushing that onto an analytics gold table means slow lookups and no clean write path. Lakebase is the right tool and the clearest reason-to-exist in the build. The worklist is a managed synced table from the gold build; the write-back lives in native Postgres tables registered back into Unity Catalog, so operational truth reaches the governed lakehouse and Genie with no reverse ETL.
+
+**EV ranks, ai_decide sequences.** Expected Star-weighted value ranks the worklist, and that number stays the exec-defensible one. On top of it, `ai_decide` makes a per-member judgment EV does not: which single open measure to lead the next contact with, and whether to bundle a second ask or keep the burden to one. The decision is batch-materialized into worklist columns with its confidence and per-option probabilities, and a guard snaps any out-of-set choice back to the member's top-EV gap. It sequences the ask; it never overrides the ranking.
 
 **A propensity model instead of a rule.** "Call everyone with an open gap" wastes finite coordinator capacity. The model concentrates capacity on persuadable, high-weight members. The case is the lift chart, not an assertion.
 
