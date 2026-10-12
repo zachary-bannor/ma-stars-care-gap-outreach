@@ -45,13 +45,12 @@ HOST = admin.config.host.rstrip("/")
 
 
 # --------------------------------------------------------------------------- creds
-def analyst_client():
-    """The analyst SP client. Mints a fresh OAuth M2M secret via the secrets proxy if
-    /tmp/analyst_creds.json is absent (secrets are deleted between sessions)."""
-    path = "/tmp/analyst_creds.json"
-    if os.path.exists(path):
-        c = json.load(open(path))
-        return WorkspaceClient(host=c["host"], client_id=c["client_id"], client_secret=c["client_secret"])
+ANALYST_CREDS = "/tmp/analyst_creds.json"
+
+
+def _mint_analyst():
+    """Mint a fresh OAuth M2M secret for the analyst SP via the secrets proxy, cache it,
+    and return a client."""
     scim_id = None
     for sp in admin.service_principals.list(filter=f'applicationId eq "{ANALYST_APP_ID}"'):
         scim_id = sp.id
@@ -63,9 +62,25 @@ def analyst_client():
     if out.returncode != 0:
         raise RuntimeError("mint failed: " + out.stderr.splitlines()[0] if out.stderr else "mint failed")
     secret = json.loads(out.stdout).get("secret")
-    creds = {"host": HOST, "client_id": ANALYST_APP_ID, "client_secret": secret}
-    json.dump(creds, open(path, "w"))
+    with open(ANALYST_CREDS, "w") as f:
+        json.dump({"host": HOST, "client_id": ANALYST_APP_ID, "client_secret": secret}, f)
     return WorkspaceClient(host=HOST, client_id=ANALYST_APP_ID, client_secret=secret)
+
+
+def analyst_client():
+    """The analyst SP client. Reuses a cached secret only after validating it with a live
+    call: /tmp survives across sessions but the SP secret may have been revoked meanwhile,
+    and a stale secret would silently fail every query. Re-mints on any validation failure."""
+    if os.path.exists(ANALYST_CREDS):
+        try:
+            with open(ANALYST_CREDS) as f:
+                c = json.load(f)
+            client = WorkspaceClient(host=c["host"], client_id=c["client_id"], client_secret=c["client_secret"])
+            client.current_user.me()  # cheap auth probe; raises on a dead secret
+            return client
+        except Exception as e:
+            print("cached analyst creds invalid, re-minting:", str(e).splitlines()[0][:100])
+    return _mint_analyst()
 
 
 # --------------------------------------------------------------------------- sql
@@ -90,8 +105,7 @@ def one_value(cols, rows):
 
 
 # --------------------------------------------------------------------------- part A
-def part_a():
-    analyst = analyst_client()
+def part_a(analyst):
     who = one_value(*run_sql(analyst, "SELECT current_user()"))
     lines = ["# Layer 7 benchmarks (A): governed correctness, masking, OntoRank contrast",
              "",
@@ -119,14 +133,28 @@ def part_a():
         lines.append(f"- [{'PASS' if ok else 'FAIL'}] {b['question']}  ->  {detail}")
     lines.append("")
 
-    # masking contrast: same sample row cleartext (break-glass) vs pseudonym (analyst)
-    q = f"SELECT member_id FROM {CATALOG}.governance.gap_scores ORDER BY member_id LIMIT 1"
-    bg_val = one_value(*run_sql(admin, q))
-    an_val = one_value(*run_sql(analyst, q))
-    lines += ["## Masking contrast (same query, two identities)\n",
+    # masking contrast: the SAME physical member cleartext (break-glass) vs pseudonym
+    # (analyst). The member must be pinned by a value that is identical under both
+    # identities, so we cannot ORDER BY member_id (it is the masked column: break-glass
+    # would sort on cleartext and the analyst on the hash, picking different members).
+    # Instead, break-glass picks the deterministic minimum member and its expected
+    # SHA-256; the analyst then fetches that same member by filtering on the pseudonym,
+    # proving member_id -> fn_mask_member_id(member_id) for one concrete member.
+    bg_cols, bg_rows = run_sql(admin,
+        f"SELECT member_id, sha2(member_id, 256) AS expected_pseudonym "
+        f"FROM {CATALOG}.governance.gap_scores ORDER BY member_id LIMIT 1")
+    bg_val, expected_pseudo = bg_rows[0][0], bg_rows[0][1]
+    an_val = one_value(*run_sql(analyst,
+        f"SELECT member_id FROM {CATALOG}.governance.gap_scores "
+        f"WHERE member_id = '{expected_pseudo}' LIMIT 1"))
+    matches = (an_val == expected_pseudo)
+    lines += ["## Masking contrast (same member, two identities)\n",
               f"- break-glass member_id: `{bg_val}`",
-              f"- analyst member_id:     `{an_val}`  (SHA-256 pseudonym, {len(an_val or '')} hex chars)", ""]
-    results["masking_contrast"] = {"breakglass": bg_val, "analyst": an_val}
+              f"- analyst member_id:     `{an_val}`  (SHA-256 pseudonym, {len(an_val or '')} hex chars)",
+              f"- analyst value equals sha2(break-glass id, 256): **{matches}**  "
+              f"(so both rows are the same member, `{bg_val}`, under the Layer 3 mask)", ""]
+    results["masking_contrast"] = {"member": bg_val, "breakglass": bg_val,
+                                   "analyst": an_val, "pseudonym_matches": matches}
 
     # OntoRank contrast: certified metric view vs uncertified trap, same business question
     cert = one_value(*run_sql(analyst,
@@ -205,18 +233,22 @@ def _attachment_text(msg):
     return None
 
 
-def part_b(space_id):
+def part_b(space_id, analyst):
     lines = ["# Layer 7 benchmarks (B): natural-language accuracy via the Conversation API",
              "",
              f"Questions sent to the live Genie space `{space_id}` through the Conversation "
-             f"API. For each: the SQL Genie generated and which governed source it chose. "
-             f"The retrievable-value question shows whether Genie preferred the certified "
-             f"metric view over the uncertified scratch trap.", ""]
+             f"API **as the quality-analyst service principal** (granted CAN_RUN on the "
+             f"space in 03_create_space.py). Genie runs each generated query under this "
+             f"identity, so the Layer 3 masks and contract row filter apply to the NL path "
+             f"too: member ids come back pseudonymized in the answers below, exactly as a "
+             f"real analyst would see them. For each question: the SQL Genie generated and "
+             f"which governed source it chose. The retrievable-value question shows whether "
+             f"Genie preferred the certified metric view over the uncertified scratch trap.", ""]
     rows_summary = []
     questions = list(space_spec.SAMPLE_QUESTIONS)
     for q in questions:
         try:
-            msg = admin.genie.start_conversation_and_wait(space_id, q)
+            msg = analyst.genie.start_conversation_and_wait(space_id, q)
             sql = _attachment_sql(msg) or ""
             text = _attachment_text(msg) or ""
             # Genie quotes identifiers with backticks (`cat`.`governance`.`worklist`), so
@@ -242,10 +274,12 @@ def part_b(space_id):
 
 
 def main():
-    info = json.load(open(os.path.join(EVID, "space_info.json")))
+    with open(os.path.join(EVID, "space_info.json")) as f:
+        info = json.load(f)
     space_id = info["space_id"]
-    a = part_a()
-    b = part_b(space_id)
+    analyst = analyst_client()  # minted/validated once, used for both parts
+    a = part_a(analyst)
+    b = part_b(space_id, analyst)
     summary = {"space_id": space_id, "space_url": info.get("url"),
                "part_a": a, "part_b": b}
     with open(os.path.join(EVID, "summary.json"), "w") as f:

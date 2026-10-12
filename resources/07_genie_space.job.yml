@@ -20,8 +20,8 @@ resources:
               catalog: ${var.catalog}
               analyst_principal: ${var.analyst_principal}
         - task_key: scratch_trap
-          depends_on:
-            - task_key: governed_surfaces
+          # No depends_on: 02 reads only gold.* and writes analytics_sandbox, nothing
+          # 00_governed_surfaces produces, so it runs in parallel with governed_surfaces.
           notebook_task:
             notebook_path: ../src/07_genie_space/02_scratch_trap.py
             base_parameters:

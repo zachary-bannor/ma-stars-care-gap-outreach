@@ -123,16 +123,17 @@ mad_retrievable_value | mad_open_gaps
 ## Benchmark assertions
 
 - [PASS] What is the total number of open care gaps?  ->  got 67202, expected 67202
-- [PASS] Open gaps by measure.  ->  got {'GSD': 5835, 'EED': 9827, 'CBP': 25874, 'COL': 19313, 'MAD': 6353}
+- [PASS] Open gaps by measure.  ->  got {'COL': 19313, 'GSD': 5835, 'MAD': 6353, 'CBP': 25874, 'EED': 9827}
 - [PASS] Total retrievable Star-weighted value (certified).  ->  certified total = 42327.45
 - [PASS] member_id must come back pseudonymized for the analyst persona.  ->  member_id=5a9d61225b4155ea...
 - [PASS] The active worklist is bounded to the top members on the active contract.  ->  500 members, 1 contract(s)
 - [PASS] ai_decide led some members with a lower-value ask than their top gap.  ->  count = 5
 
-## Masking contrast (same query, two identities)
+## Masking contrast (same member, two identities)
 
 - break-glass member_id: `M00000001`
-- analyst member_id:     `00001b2029db4841856554c10e39e053e0ad643f557132b972558975aea088c2`  (SHA-256 pseudonym, 64 hex chars)
+- analyst member_id:     `6c9f65424a601b60ca6b9a3ad23bb48bfbf0d1f54e29d60ede37944d9a1e107c`  (SHA-256 pseudonym, 64 hex chars)
+- analyst value equals sha2(break-glass id, 256): **True**  (so both rows are the same member, `M00000001`, under the Layer 3 mask)
 
 ## Certified vs uncertified retrievable value (why the source matters)
 

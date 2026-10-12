@@ -27,6 +27,7 @@ import space_spec
 PROFILE = "fe-vm-zrb-fe-bar-uhc-stars"
 WAREHOUSE = "c6360590bf1c28d6"
 CATALOG = "zrb_fe_bar_uhc_stars_catalog"
+ANALYST_APP_ID = "9490fdb4-1a5e-42eb-b5a6-4ecab7d48337"  # quality-analyst SP
 TITLE = "MA Stars Care-Gap Analytics (VP Stars)"
 DESCRIPTION = ("Governed natural-language analytics over Medicare Advantage Star and HEDIS "
                "care gaps for the quality manager / VP Stars: open gaps, retrievable "
@@ -75,6 +76,20 @@ def create_or_update(payload):
     return sp
 
 
+def grant_analyst_run(space_id):
+    """Share the space with the quality-analyst SP (CAN_RUN) so it can drive the space.
+    This is what lets the Conversation-API benchmark (04) run as the analyst and prove the
+    Layer 3 masks apply to the NL path. PATCH adds to the ACL without disturbing the owner.
+    Idempotent: re-granting CAN_RUN is a no-op."""
+    try:
+        w.api_client.do("PATCH", f"/api/2.0/permissions/genie/{space_id}",
+                        body={"access_control_list": [
+                            {"service_principal_name": ANALYST_APP_ID, "permission_level": "CAN_RUN"}]})
+        print("granted analyst SP CAN_RUN on the space")
+    except Exception as e:
+        print("analyst space grant warning:", str(e).splitlines()[0][:120])
+
+
 def main():
     payload = space_spec.serialized_space(CATALOG)
     try:
@@ -90,6 +105,8 @@ def main():
     space_id = sp.space_id
     host = w.config.host.rstrip("/")
     url = f"{host}/genie/rooms/{space_id}"
+
+    grant_analyst_run(space_id)
 
     # Read back the stored serialized_space (the authoritative committed definition).
     got = w.genie.get_space(space_id, include_serialized_space=True)

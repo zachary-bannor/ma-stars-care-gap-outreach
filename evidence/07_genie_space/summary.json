@@ -8,7 +8,7 @@
     },
     "Open gaps by measure.": {
       "pass": true,
-      "detail": "got {'GSD': 5835, 'EED': 9827, 'CBP': 25874, 'COL': 19313, 'MAD': 6353}"
+      "detail": "got {'COL': 19313, 'GSD': 5835, 'MAD': 6353, 'CBP': 25874, 'EED': 9827}"
     },
     "Total retrievable Star-weighted value (certified).": {
       "pass": true,
@@ -27,8 +27,10 @@
       "detail": "count = 5"
     },
     "masking_contrast": {
+      "member": "M00000001",
       "breakglass": "M00000001",
-      "analyst": "00001b2029db4841856554c10e39e053e0ad643f557132b972558975aea088c2"
+      "analyst": "6c9f65424a601b60ca6b9a3ad23bb48bfbf0d1f54e29d60ede37944d9a1e107c",
+      "pseudonym_matches": true
     },
     "ontorank_contrast": {
       "certified": "42327.45",
