@@ -42,7 +42,6 @@ EVID = HERE.parents[1] / "evidence" / "08_app"
 sys.path.insert(0, str(HERE))
 import worklist_queries as q  # noqa: E402
 
-q.SCHEMA = PG_SCHEMA
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -134,30 +133,34 @@ def main():
     summary["checks"]["delete_denied"] = delete_denied
 
     # 5. transactional write-back round-trip (the app's exact path)
-    target = rows[0][cols.index("member_id")]
-    before = None
-    with conn.cursor() as cur:
-        cur.execute(q.member_status_sql(schema=PG_SCHEMA), (target,))
-        b = cur.fetchone()
-        before = dict(zip([c.name for c in cur.description], b)) if b else None
-    try:
+    target = rows[0][cols.index("member_id")] if rows else None
+    before = after = None
+    writeback_ok = False
+    if target is None:
+        summary["checks"]["writeback_roundtrip"] = False
+        summary["writeback_error"] = "worklist is empty; nothing to write back"
+    else:
         with conn.cursor() as cur:
-            cur.execute(q.insert_action_sql(schema=PG_SCHEMA),
-                        (target, "EED", "called", "phone", "left_voicemail",
-                         "Evidence run: governed write-back round-trip.", COORD_CLIENT_ID))
-            cur.execute(q.upsert_status_sql(schema=PG_SCHEMA),
-                        (target, "contacted", "called", None, COORD_CLIENT_ID))
-        conn.commit()
-        writeback_ok = True
-    except Exception as exc:
-        conn.rollback()
-        writeback_ok = False
-        summary["writeback_error"] = str(exc).splitlines()[0]
-    with conn.cursor() as cur:
-        cur.execute(q.member_status_sql(schema=PG_SCHEMA), (target,))
-        a = cur.fetchone()
-        after = dict(zip([c.name for c in cur.description], a)) if a else None
-    summary["checks"]["writeback_roundtrip"] = writeback_ok and after is not None
+            cur.execute(q.member_status_sql(schema=PG_SCHEMA), (target,))
+            b = cur.fetchone()
+            before = dict(zip([c.name for c in cur.description], b)) if b else None
+        try:
+            with conn.cursor() as cur:
+                cur.execute(q.insert_action_sql(schema=PG_SCHEMA),
+                            (target, "EED", "called", "phone", "left_voicemail",
+                             "Evidence run: governed write-back round-trip.", COORD_CLIENT_ID))
+                cur.execute(q.upsert_status_sql(schema=PG_SCHEMA),
+                            (target, "contacted", "called", None, COORD_CLIENT_ID))
+            conn.commit()
+            writeback_ok = True
+        except Exception as exc:
+            conn.rollback()
+            summary["writeback_error"] = str(exc).splitlines()[0]
+        with conn.cursor() as cur:
+            cur.execute(q.member_status_sql(schema=PG_SCHEMA), (target,))
+            a = cur.fetchone()
+            after = dict(zip([c.name for c in cur.description], a)) if a else None
+        summary["checks"]["writeback_roundtrip"] = writeback_ok and after is not None
 
     conn.close()
 

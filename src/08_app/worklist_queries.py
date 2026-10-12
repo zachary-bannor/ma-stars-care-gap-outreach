@@ -15,9 +15,9 @@ Tables (Lakebase Postgres, schema ``ops``, registered in Unity Catalog by Layer 
 
 SCHEMA = "ops"
 
-# Columns the coordinator UI reads. Deliberately a subset: the serving surface is
-# already column-minimized to coordinator-entitled fields, so the app never selects
-# anything it should not see.
+# Full set of columns the member detail panel reads. Deliberately a subset of the
+# lakehouse: the serving surface is already column-minimized to coordinator-entitled
+# fields, so the app never selects anything it should not see.
 WORKLIST_COLUMNS = [
     "worklist_rank",
     "member_id",
@@ -37,6 +37,21 @@ WORKLIST_COLUMNS = [
     "tenure_band",
     "draft_subject",
     "draft_body",
+    "requires_human_review",
+]
+
+# Lighter column set for the list view. The table, headline metrics, and member
+# selector need only these, so the per-member draft text and probabilities are not
+# shipped for every row on every rerun (they load with the selected member instead).
+LIST_COLUMNS = [
+    "worklist_rank",
+    "member_id",
+    "contract_id",
+    "member_ev",
+    "open_gap_count",
+    "lead_measure",
+    "lead_measure_name",
+    "lead_confidence",
     "requires_human_review",
 ]
 
@@ -75,21 +90,25 @@ def default_channel(preferred_channel):
     return PREFERRED_CHANNEL_DEFAULT.get(preferred_channel, "phone")
 
 
-def worklist_select_sql(schema=SCHEMA, limit=500):
-    """Prioritized worklist joined to the member's current coordinator status.
+def worklist_select_sql(schema=SCHEMA, limit=None):
+    """Prioritized worklist (list columns) joined to the member's current status.
 
     LEFT JOIN keeps members who have not been worked yet (status NULL). Ordered by
     worklist_rank, which Layer 6 computed from member_ev DESC (the exec-defensible
-    ranking, unchanged by ai_decide)."""
-    cols = ", ".join(f"w.{c}" for c in WORKLIST_COLUMNS)
-    return (
+    ranking, unchanged by ai_decide). No LIMIT by default: the serving table is already
+    bounded to the top actionable cohort upstream in Layer 6, so the app reads it whole
+    rather than re-capping it to a magic number. `limit` is int-coerced if supplied."""
+    cols = ", ".join(f"w.{c}" for c in LIST_COLUMNS)
+    sql = (
         f"SELECT {cols}, "
         f"s.status, s.last_action, s.next_action_due, s.updated_at "
         f"FROM {schema}.worklist w "
         f"LEFT JOIN {schema}.worklist_status s USING (member_id) "
-        f"ORDER BY w.worklist_rank "
-        f"LIMIT {int(limit)}"
+        f"ORDER BY w.worklist_rank"
     )
+    if limit is not None:
+        sql += f" LIMIT {int(limit)}"
+    return sql
 
 
 def member_detail_sql(schema=SCHEMA):

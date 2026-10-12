@@ -17,10 +17,13 @@ def test_worklist_select_joins_status_and_orders_by_rank():
     assert "ops.worklist w" in sql
     assert "LEFT JOIN ops.worklist_status s USING (member_id)" in sql
     assert "ORDER BY w.worklist_rank" in sql
-    assert "LIMIT 500" in sql
-    # every advertised worklist column is selected from the worklist alias
-    for col in q.WORKLIST_COLUMNS:
+    # no LIMIT by default: the serving table is already bounded upstream
+    assert "LIMIT" not in sql
+    # the list view selects only the light columns, never the heavy draft text
+    for col in q.LIST_COLUMNS:
         assert f"w.{col}" in sql
+    assert "w.draft_body" not in sql
+    assert "w.lead_probabilities" not in sql
 
 
 def test_worklist_select_limit_is_int_coerced():
@@ -31,6 +34,13 @@ def test_worklist_select_limit_is_int_coerced():
 
     with pytest.raises(ValueError):
         q.worklist_select_sql(limit="5; DROP TABLE ops.worklist")
+
+
+def test_member_detail_selects_full_columns_including_draft():
+    sql = q.member_detail_sql()
+    for col in q.WORKLIST_COLUMNS:
+        assert col in sql
+    assert "draft_body" in sql  # detail panel needs the draft the list view omits
 
 
 def test_member_detail_is_parameterized():

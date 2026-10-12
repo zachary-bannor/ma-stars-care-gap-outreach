@@ -39,8 +39,6 @@ PG_SCHEMA = os.environ.get("PG_SCHEMA", "ops")
 COORD_CLIENT_ID = os.environ.get("COORD_CLIENT_ID")
 COORD_CLIENT_SECRET = os.environ.get("COORD_CLIENT_SECRET")  # from secret scope via valueFrom
 
-q.SCHEMA = PG_SCHEMA  # keep the shared helpers aligned to the configured schema
-
 st.set_page_config(page_title="Stars Care-Gap Coordinator Worklist", layout="wide")
 
 
@@ -93,7 +91,10 @@ def _rows_to_df(cur):
     return pd.DataFrame(cur.fetchall(), columns=cols)
 
 
+@st.cache_data(ttl=30, show_spinner=False)
 def load_worklist():
+    """List-view worklist, cached briefly so pure UI reruns (selecting a member) do not
+    re-hit Lakebase. Cleared after a write-back so a recorded action shows immediately."""
     with open_conn() as conn, conn.cursor() as cur:
         cur.execute(q.worklist_select_sql(schema=PG_SCHEMA))
         return _rows_to_df(cur)
@@ -176,6 +177,12 @@ def main():
         "record outreach, cannot delete)."
     )
 
+    # Surface the confirmation of the last write-back, which survives the st.rerun that
+    # refreshes the worklist (st.success alone would be discarded by that rerun).
+    flash = st.session_state.pop("flash", None)
+    if flash:
+        {"success": st.success, "error": st.error}.get(flash[0], st.info)(flash[1])
+
     missing = [n for n, v in {
         "DATABRICKS_HOST": HOST,
         "COORD_CLIENT_ID": COORD_CLIENT_ID,
@@ -206,7 +213,12 @@ def main():
     worked = int(wl["status"].notna().sum())
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Members on worklist", f"{total_members:,}")
-    c2.metric("Retrievable Star-weighted value", _fmt_money(total_ev))
+    c2.metric(
+        "Worklist Star-weighted value",
+        _fmt_money(total_ev),
+        help="Expected Star-weighted value across this actionable worklist cohort "
+             "(the top members by EV for contract H1234). Not the full-contract total.",
+    )
     c3.metric("Drafts needing review", f"{needs_review:,}")
     c4.metric("Already worked", f"{worked:,} / {total_members:,}")
 
@@ -283,10 +295,11 @@ def main():
         with st.form("record_action", clear_on_submit=True):
             st.markdown("**Record outreach**")
             action = st.selectbox("Action", q.ACTIONS)
+            default_ch = q.default_channel(detail.get("preferred_channel"))
             channel = st.selectbox(
                 "Channel",
                 q.CHANNELS,
-                index=q.CHANNELS.index(q.default_channel(detail.get("preferred_channel"))),
+                index=q.CHANNELS.index(default_ch) if default_ch in q.CHANNELS else 0,
             )
             outcome = st.selectbox("Outcome", q.OUTCOMES)
             notes = st.text_area("Notes", placeholder="Optional notes for the member record.")
@@ -301,7 +314,11 @@ def main():
                 st.error(f"Write-back failed and was rolled back: {exc}")
             else:
                 due_txt = f", follow-up due {due:%Y-%m-%d}" if due else ""
-                st.success(f"Recorded. Member status is now '{status}'{due_txt}.")
+                st.session_state["flash"] = (
+                    "success",
+                    f"Recorded for {member_id}. Status is now '{status}'{due_txt}.",
+                )
+                load_worklist.clear()  # refresh the cached list so the new status shows
                 st.rerun()
 
 

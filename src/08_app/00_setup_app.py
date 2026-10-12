@@ -45,7 +45,9 @@ def prune_oldest_if_full():
     secrets = json.loads(_proxy("list").stdout)
     if len(secrets) < MAX_SP_SECRETS:
         return
-    oldest = min(secrets, key=lambda s: s.get("create_time", ""))
+    # Sort a missing create_time last (not first), so a timestamp-less secret is never
+    # mistaken for the oldest and evicted ahead of genuinely older credentials.
+    oldest = min(secrets, key=lambda s: s.get("create_time") or "9999")
     _proxy("delete", oldest["id"])
     print(f"pruned oldest coordinator SP secret {oldest['id'][:12]}... to stay under the "
           f"{MAX_SP_SECRETS}-secret cap")

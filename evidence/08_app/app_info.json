@@ -1,18 +1,18 @@
 {
   "active_deployment": {
-    "create_time": "2026-10-12T18:23:01Z",
+    "create_time": "2026-10-12T18:34:45Z",
     "creator": "zachary.bannor@databricks.com",
     "deployment_artifacts": {
-      "source_code_path": "/Workspace/Users/f0256d93-7f9c-4a4a-aaa7-5c649b215b78/src/01f1c669f59d18febd9d3fb25572f910"
+      "source_code_path": "/Workspace/Users/f0256d93-7f9c-4a4a-aaa7-5c649b215b78/src/01f1c66b98ce104eb83a7293ad8d0b44"
     },
-    "deployment_id": "01f1c669f59d18febd9d3fb25572f910",
+    "deployment_id": "01f1c66b98ce104eb83a7293ad8d0b44",
     "mode": "SNAPSHOT",
     "source_code_path": "/Workspace/Users/zachary.bannor@databricks.com/.bundle/ma-stars-care-gap-outreach/dev/files/src/08_app",
     "status": {
       "message": "App started successfully",
       "state": "SUCCEEDED"
     },
-    "update_time": "2026-10-12T18:23:15Z"
+    "update_time": "2026-10-12T18:34:52Z"
   },
   "app_status": {
     "message": "App has status: App is running",
@@ -50,7 +50,7 @@
   "service_principal_id": 71740103474780,
   "service_principal_name": "app-4fntvm zrb-stars-coordinator",
   "thumbnail_url": "",
-  "update_time": "2026-10-12T18:23:01Z",
+  "update_time": "2026-10-12T18:34:45Z",
   "updater": "zachary.bannor@databricks.com",
   "url": "https://zrb-stars-coordinator-7474649467662043.aws.databricksapps.com"
 }
