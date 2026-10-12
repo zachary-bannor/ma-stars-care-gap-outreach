@@ -1,0 +1,6 @@
+measure_id,measure_name,star_weight
+MAD,Medication Adherence for Diabetes Medications,3
+CBP,Controlling High Blood Pressure,1
+COL,Colorectal Cancer Screening,1
+EED,Eye Exam for Patients with Diabetes,1
+GSD,Glycemic Status Assessment for Patients with Diabetes,1

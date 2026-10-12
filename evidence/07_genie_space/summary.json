@@ -1,0 +1,80 @@
+{
+  "space_id": "01f1c660da191d8fac9592c222cc0648",
+  "space_url": "https://fevm-zrb-fe-bar-uhc-stars.cloud.databricks.com/genie/rooms/01f1c660da191d8fac9592c222cc0648",
+  "part_a": {
+    "What is the total number of open care gaps?": {
+      "pass": true,
+      "detail": "got 67202, expected 67202"
+    },
+    "Open gaps by measure.": {
+      "pass": true,
+      "detail": "got {'GSD': 5835, 'EED': 9827, 'CBP': 25874, 'COL': 19313, 'MAD': 6353}"
+    },
+    "Total retrievable Star-weighted value (certified).": {
+      "pass": true,
+      "detail": "certified total = 42327.45"
+    },
+    "member_id must come back pseudonymized for the analyst persona.": {
+      "pass": true,
+      "detail": "member_id=5a9d61225b4155ea..."
+    },
+    "The active worklist is bounded to the top members on the active contract.": {
+      "pass": true,
+      "detail": "500 members, 1 contract(s)"
+    },
+    "ai_decide led some members with a lower-value ask than their top gap.": {
+      "pass": true,
+      "detail": "count = 5"
+    },
+    "masking_contrast": {
+      "breakglass": "M00000001",
+      "analyst": "00001b2029db4841856554c10e39e053e0ad643f557132b972558975aea088c2"
+    },
+    "ontorank_contrast": {
+      "certified": "42327.45",
+      "trap": "200330.0"
+    }
+  },
+  "part_b": [
+    {
+      "question": "What is the total retrievable Star-weighted value across all open care gaps?",
+      "source": "certified metric view",
+      "has_sql": true
+    },
+    {
+      "question": "Show the retrievable Star-weighted value and open-gap count by measure.",
+      "source": "certified metric view",
+      "has_sql": true
+    },
+    {
+      "question": "Which members have open diabetes gaps and the highest expected Star-weighted value?",
+      "source": "governed table",
+      "has_sql": true
+    },
+    {
+      "question": "How many open CBP gaps are there on contract H1234?",
+      "source": "certified metric view",
+      "has_sql": true
+    },
+    {
+      "question": "What is the total retrievable Star-weighted value in the active worklist?",
+      "source": "governed table",
+      "has_sql": true
+    },
+    {
+      "question": "How many members in the active worklist are we leading with medication adherence?",
+      "source": "governed table",
+      "has_sql": true
+    },
+    {
+      "question": "Which members are we leading with a lower-value ask than their highest-value gap, and why might that be?",
+      "source": "governed table",
+      "has_sql": true
+    },
+    {
+      "question": "How many outreach drafts are pending human review, by measure?",
+      "source": "governed table",
+      "has_sql": true
+    }
+  ]
+}

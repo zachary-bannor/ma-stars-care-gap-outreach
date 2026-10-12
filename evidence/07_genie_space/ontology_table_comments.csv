@@ -1,0 +1,11 @@
+table_schema,table_name,comment
+analytics_sandbox,star_value_rollup,Star value rollup by measure (legacy quality-dashboard source). Totals gaps and Star value across the book.
+governance,care_gaps,Governed care-gap worklist. member_id/birth_date/dual_eligible masked by policy; row-filtered by contract.
+governance,coordinator_scope,Row-level security assignment map for care coordinators (lookup-driven RLS).
+governance,gap_scores,"Scored open care gaps: per member x open HEDIS measure, the calibrated closure propensity and expected Star-weighted value (EV = propensity x star_weight), the exec-ranked retrievable-value proxy. member_id pseudonymized; row-filtered by contract. Certified."
+governance,measure_weights,"Measure dimension: the five HEDIS Star measures, their CMS Star weight (MAD triple-weighted) and display names. Public reference, certified."
+governance,member_dim,"Member entity dimension: one governed row per Medicare Advantage member. member_id pseudonymized, birth_date generalized to year, age capped at 90, dual-eligible analyst-visible; row-filtered by contract."
+governance,member_labs,Governed lab readings. result_value clinically masked; member_id masked; row-filtered by contract.
+governance,outreach_drafts,Governed outreach drafts worklist. member_id masked by policy; row-filtered by contract. Human-review only.
+governance,star_value_metrics,"Certified Star-value metric view: the authoritative retrievable Star-weighted value, open-gap and member counts, and average closure propensity over scored open gaps, by measure / contract / Star weight. Prefer this over any ad-hoc rollup."
+governance,worklist,Active prioritized coordinator worklist (top-500 members by member_ev on the active contract) with the ai_decide lead-outreach decision. member_ev is the sum of a member open-gap expected Star-weighted values. led_below_top_ev marks members ai_decide led with a lower-EV ask than their top gap. member_id pseudonymized; row-filtered by contract. Certified.

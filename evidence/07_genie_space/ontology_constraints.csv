@@ -1,0 +1,13 @@
+table_name,constraint_name,constraint_type
+care_gaps,fk_care_gaps_measure,FOREIGN KEY
+care_gaps,fk_care_gaps_member,FOREIGN KEY
+gap_scores,pk_gap_scores,PRIMARY KEY
+gap_scores,fk_gap_scores_measure,FOREIGN KEY
+gap_scores,fk_gap_scores_member,FOREIGN KEY
+measure_weights,pk_measure_weights,PRIMARY KEY
+member_dim,pk_member_dim,PRIMARY KEY
+outreach_drafts,fk_drafts_measure,FOREIGN KEY
+outreach_drafts,fk_drafts_member,FOREIGN KEY
+worklist,pk_worklist,PRIMARY KEY
+worklist,fk_worklist_lead_measure,FOREIGN KEY
+worklist,fk_worklist_member,FOREIGN KEY

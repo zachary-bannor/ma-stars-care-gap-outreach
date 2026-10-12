@@ -1,0 +1,9 @@
+child_table,child_column,parent_table,parent_column,constraint_name
+care_gaps,measure_id,measure_weights,measure_id,fk_care_gaps_measure
+care_gaps,member_id,member_dim,member_id,fk_care_gaps_member
+gap_scores,measure_id,measure_weights,measure_id,fk_gap_scores_measure
+gap_scores,member_id,member_dim,member_id,fk_gap_scores_member
+outreach_drafts,measure_id,measure_weights,measure_id,fk_drafts_measure
+outreach_drafts,member_id,member_dim,member_id,fk_drafts_member
+worklist,lead_measure,measure_weights,measure_id,fk_worklist_lead_measure
+worklist,member_id,member_dim,member_id,fk_worklist_member

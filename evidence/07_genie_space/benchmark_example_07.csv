@@ -1,0 +1,6 @@
+member_id,lead_measure,lead_measure_name,lead_value,lead_confidence
+66d5c3bc0a1c177999f80afbeb7bf96633006db221c734e3a181cfc95204a1c6,GSD,Diabetes HbA1c blood-sugar lab (GSD),0.577,0.39
+31c3c62903f2c14ce94ef31d046b7ab0281eaf7684998f6675d730eded235c78,GSD,Diabetes HbA1c blood-sugar lab (GSD),0.577,0.39
+483897bc3d1d6ecac0dfdf442339bb898e8a43e20d26937b1a21b2c4f3f80625,GSD,Diabetes HbA1c blood-sugar lab (GSD),0.577,0.43
+cbebcfd4dd26a73a3e152c762bc6969ae7c3140917cb0cb5d5969efe0d4db6c1,CBP,Controlling blood pressure (CBP),0.614,0.42
+e3a41d95899836f61093dc7a32c152b40a04458f7b04026401e5f401cc47b86b,CBP,Controlling blood pressure (CBP),0.612,0.53

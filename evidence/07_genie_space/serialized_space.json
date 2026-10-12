@@ -1,0 +1,410 @@
+{
+  "version": 2,
+  "config": {
+    "sample_questions": [
+      {
+        "id": "018760d5aae358c0b4c490bafd059f72",
+        "question": [
+          "How many outreach drafts are pending human review, by measure?"
+        ]
+      },
+      {
+        "id": "0e57f4840021537dbcf61a317ea3ffff",
+        "question": [
+          "Show the retrievable Star-weighted value and open-gap count by measure."
+        ]
+      },
+      {
+        "id": "5db46600f1c957e2a2a858287ac23f3c",
+        "question": [
+          "Which members are we leading with a lower-value ask than their highest-value gap, and why might that be?"
+        ]
+      },
+      {
+        "id": "658a1c6359545222811ed8b839f254a1",
+        "question": [
+          "How many open CBP gaps are there on contract H1234?"
+        ]
+      },
+      {
+        "id": "7bfc5cdae4285f0ab5f3dc6aa75b19b1",
+        "question": [
+          "How many members in the active worklist are we leading with medication adherence?"
+        ]
+      },
+      {
+        "id": "93b5603180625c508b75cf36923b68a9",
+        "question": [
+          "Which members have open diabetes gaps and the highest expected Star-weighted value?"
+        ]
+      },
+      {
+        "id": "a2e196d277f05e2d92d0c859024d69db",
+        "question": [
+          "What is the total retrievable Star-weighted value across all open care gaps?"
+        ]
+      },
+      {
+        "id": "f197e1bbdf935de9862541b40f221701",
+        "question": [
+          "What is the total retrievable Star-weighted value in the active worklist?"
+        ]
+      }
+    ]
+  },
+  "data_sources": {
+    "tables": [
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.analytics_sandbox.star_value_rollup",
+        "description": [
+          "UNCERTIFIED legacy scratch rollup. Computes Star value incorrectly (flattens the MAD triple weight, counts closed gaps). Do not use for official numbers."
+        ]
+      },
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.governance.care_gaps",
+        "description": [
+          "Full care-gap inventory, all statuses (open / closed / excluded), one row per member x measure."
+        ],
+        "column_configs": [
+          {
+            "column_name": "contract_id"
+          },
+          {
+            "column_name": "gap_status"
+          },
+          {
+            "column_name": "measure_id"
+          }
+        ]
+      },
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.governance.gap_scores",
+        "description": [
+          "Scored open gaps: per member x open measure, closure propensity and expected Star-weighted value (EV). Certified source of retrievable value."
+        ],
+        "column_configs": [
+          {
+            "column_name": "contract_id"
+          },
+          {
+            "column_name": "measure_id"
+          }
+        ]
+      },
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.governance.measure_weights",
+        "description": [
+          "Measure dimension: the five HEDIS Star measures, names and CMS Star weights (MAD triple-weighted)."
+        ],
+        "column_configs": [
+          {
+            "column_name": "measure_id"
+          }
+        ]
+      },
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.governance.member_dim",
+        "description": [
+          "Member entity dimension: one governed row per member. member_id is a pseudonym."
+        ],
+        "column_configs": [
+          {
+            "column_name": "contract_id"
+          },
+          {
+            "column_name": "preferred_channel"
+          },
+          {
+            "column_name": "sex"
+          },
+          {
+            "column_name": "tenure_band"
+          }
+        ]
+      },
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.governance.outreach_drafts",
+        "description": [
+          "Human-review GenAI outreach drafts for top-priority gaps. No PHI sent to the model."
+        ],
+        "column_configs": [
+          {
+            "column_name": "measure_id"
+          },
+          {
+            "column_name": "review_status"
+          }
+        ]
+      },
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics",
+        "description": [
+          "Certified metric view: the authoritative retrievable Star-weighted value, counts and propensity. Prefer this for value/total/count questions."
+        ]
+      },
+      {
+        "identifier": "zrb_fe_bar_uhc_stars_catalog.governance.worklist",
+        "description": [
+          "Active prioritized worklist (top-500 by member_ev on contract H1234) with the ai_decide lead-outreach decision."
+        ],
+        "column_configs": [
+          {
+            "column_name": "contract_id"
+          },
+          {
+            "column_name": "lead_measure"
+          },
+          {
+            "column_name": "preferred_channel"
+          },
+          {
+            "column_name": "tenure_band"
+          }
+        ]
+      }
+    ]
+  },
+  "instructions": {
+    "text_instructions": [
+      {
+        "id": "e714af68309f55d3a2125bc708d30f32",
+        "content": [
+          "This space answers Medicare Advantage Star and HEDIS care-gap questions for a quality manager or VP of Stars. Lead with the business outcome: open care gaps, the retrievable Star-weighted value they represent, and the active outreach worklist.Results are governed. member_id is a stable SHA-256 pseudonym, not a real member identifier, so you can group and join on it but never claim to identify a person. Birth dates are generalized to year and raw clinical values are not available to this persona. Report across all contracts unless the user names one.For any question about retrievable Star-weighted value, totals, counts, member counts or average closure propensity, use the certified metric view zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics. It is the single authoritative definition of these numbers. Prefer certified, trusted sources over ad-hoc tables. Never use zrb_fe_bar_uhc_stars_catalog.analytics_sandbox.star_value_rollup or anything under analytics_sandbox for official numbers: it is uncertified and computes Star value incorrectly (it flattens the triple-weighted MAD measure and counts closed gaps as retrievable).Retrievable Star-weighted value is the sum of expected_weighted_value over open scored gaps, where expected_weighted_value = calibrated closure propensity x CMS Star weight. It is the exec-defensible proxy for the dollars still recoverable this measurement year. member_ev is a single member's share of that, summed over their open gaps, and is how the worklist is ranked.Glossary. Star rating: CMS's 1 to 5 quality score for a Medicare Advantage contract; reaching 4.0 unlocks the Quality Bonus Payment, the dollar cliff that funds this work. HEDIS: the measure set the Star score is built from. Open gap: an actionable, not-yet-closed measure for a member this year. star_weight: the CMS weight of a measure; MAD medication adherence is triple-weighted (3), the others are weight 1. Active worklist: the top-500 members by member_ev on the active contract. lead_measure: the single measure the ai_decide model chose to lead a member's next contact with. bundle: whether to add a second ask to that contact. led_below_top_ev: true when the lead ask was not the member's single highest-value gap, a deliberate sequencing judgment.Synonyms and mappings. 'Diabetes gaps' or 'diabetic members' means the diabetes HEDIS measures: EED (diabetic eye exam), GSD (HbA1c blood-sugar lab) and MAD (diabetes medication adherence). 'Blood pressure' or 'hypertension' means CBP. 'Colorectal', 'colon' or 'cancer screening' means COL. 'Adherence' or 'medication' means MAD. 'Retrievable value', 'opportunity', 'upside' or 'the lever' means the sum of expected_weighted_value. 'The worklist' means the active worklist on contract H1234.Defaults. Count open gaps unless the user asks about closed or all gaps. When a question is about the worklist and no contract is named, it refers to the active contract H1234. Round value figures to whole numbers in the answer.How the tables join (declared as Unity Catalog foreign keys):gap_scores.member_id = member_dim.member_id  (Scored gaps to the member entity (FK member_id).)gap_scores.measure_id = measure_weights.measure_id  (Scored gaps to the measure dimension (FK measure_id).)worklist.member_id = member_dim.member_id  (Worklist to the member entity (FK member_id).)care_gaps.measure_id = measure_weights.measure_id  (Gap inventory to the measure dimension (FK measure_id).)outreach_drafts.member_id = member_dim.member_id  (Drafts to the member entity (FK member_id).)"
+        ]
+      }
+    ],
+    "example_question_sqls": [
+      {
+        "id": "17e3999ebc805e0e8832d257216301a8",
+        "question": [
+          "Show the retrievable Star-weighted value and open-gap count by measure."
+        ],
+        "sql": [
+          "SELECT measure_id, measure_name,\n",
+          "       ROUND(MEASURE(retrievable_star_weighted_value)) AS retrievable_value,\n",
+          "       MEASURE(open_gap_count) AS open_gaps\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics\n",
+          "GROUP BY measure_id, measure_name\n",
+          "ORDER BY retrievable_value DESC"
+        ]
+      },
+      {
+        "id": "1d780cff85495419b03a4b8a2323f338",
+        "question": [
+          "How many open care gaps are there in total, by measure?"
+        ],
+        "sql": [
+          "SELECT measure_id, MEASURE(open_gap_count) AS open_gaps\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics\n",
+          "GROUP BY measure_id ORDER BY open_gaps DESC"
+        ]
+      },
+      {
+        "id": "27234cb9fa305c348d0136c052661f63",
+        "question": [
+          "How many members in the active worklist are we leading with medication adherence?"
+        ],
+        "sql": [
+          "SELECT lead_measure, lead_measure_name, COUNT(*) AS members\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.worklist\n",
+          "GROUP BY lead_measure, lead_measure_name\n",
+          "ORDER BY members DESC"
+        ]
+      },
+      {
+        "id": "33f39a85d85851d19d278b1bf43b4136",
+        "question": [
+          "What is the total retrievable Star-weighted value in the active worklist?"
+        ],
+        "sql": [
+          "SELECT ROUND(SUM(member_ev)) AS worklist_retrievable_value, COUNT(*) AS members\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.worklist"
+        ]
+      },
+      {
+        "id": "4cf3ca6aadf753eba6aee5a338f6930f",
+        "question": [
+          "List the HEDIS measures and their Star weights."
+        ],
+        "sql": [
+          "SELECT measure_id, measure_name, star_weight\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.measure_weights\n",
+          "ORDER BY star_weight DESC, measure_id"
+        ]
+      },
+      {
+        "id": "5b8b58a5093f505489d6e47b476aa279",
+        "question": [
+          "What is the average closure propensity for CBP gaps?"
+        ],
+        "sql": [
+          "SELECT ROUND(MEASURE(avg_close_propensity), 4) AS avg_propensity\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics\n",
+          "WHERE measure_id = 'CBP'"
+        ]
+      },
+      {
+        "id": "b09cde196a80597baac4f95e6311aebe",
+        "question": [
+          "Which members have open diabetes gaps and the highest expected Star-weighted value?"
+        ],
+        "sql": [
+          "SELECT member_id, measure_id, measure_name,\n",
+          "       ROUND(expected_weighted_value, 3) AS expected_value, propensity\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.gap_scores\n",
+          "WHERE measure_id IN ('EED','GSD','MAD')\n",
+          "ORDER BY expected_weighted_value DESC\n",
+          "LIMIT 20"
+        ]
+      },
+      {
+        "id": "c4e5a9c2024f55e3adb2c34bf9a56889",
+        "question": [
+          "Which members are we leading with a lower-value ask than their highest-value gap?"
+        ],
+        "sql": [
+          "SELECT member_id, lead_measure, lead_measure_name,\n",
+          "       ROUND(lead_ev, 3) AS lead_value, lead_confidence\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.worklist\n",
+          "WHERE led_below_top_ev = true\n",
+          "ORDER BY member_ev DESC"
+        ]
+      },
+      {
+        "id": "db0fabbb7e22548498c26af3372c6152",
+        "question": [
+          "How many open CBP gaps are there on contract H1234?"
+        ],
+        "sql": [
+          "SELECT MEASURE(open_gap_count) AS open_cbp_gaps\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics\n",
+          "WHERE measure_id = 'CBP' AND contract_id = 'H1234'"
+        ]
+      },
+      {
+        "id": "e051a213369f5d9c894255d3b7853150",
+        "question": [
+          "What is the total retrievable Star-weighted value across all open care gaps?"
+        ],
+        "sql": [
+          "SELECT ROUND(MEASURE(retrievable_star_weighted_value)) AS retrievable_value\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics"
+        ]
+      },
+      {
+        "id": "e7637e2b42d15b28bc75355a56dddbae",
+        "question": [
+          "What would we retrieve if we closed every open MAD medication-adherence gap?"
+        ],
+        "sql": [
+          "SELECT ROUND(MEASURE(retrievable_star_weighted_value)) AS mad_retrievable_value,\n",
+          "       MEASURE(open_gap_count) AS mad_open_gaps\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics\n",
+          "WHERE measure_id = 'MAD'"
+        ]
+      },
+      {
+        "id": "e883628632185587b0fc98da8a9f2033",
+        "question": [
+          "How many outreach drafts are pending human review, by measure?"
+        ],
+        "sql": [
+          "SELECT measure_id, COUNT(*) AS drafts_pending_review\n",
+          "FROM zrb_fe_bar_uhc_stars_catalog.governance.outreach_drafts\n",
+          "WHERE requires_human_review = true\n",
+          "GROUP BY measure_id ORDER BY drafts_pending_review DESC"
+        ]
+      }
+    ],
+    "sql_snippets": {
+      "filters": [
+        {
+          "id": "12b463cf98cf5c56819d2b6e17088c89",
+          "sql": [
+            "measure_id = 'MAD'"
+          ],
+          "display_name": "medication adherence (triple-weighted)"
+        },
+        {
+          "id": "4ce290547c4f52828a28ffbc58a6b4c5",
+          "sql": [
+            "measure_id IN ('EED','GSD','MAD')"
+          ],
+          "display_name": "open diabetes gaps"
+        },
+        {
+          "id": "595b1c5f85915563aea9df51d203d6dd",
+          "sql": [
+            "contract_id = 'H1234'"
+          ],
+          "display_name": "active contract"
+        },
+        {
+          "id": "7d5fbad8aa2351508ede10fbf8ebdf56",
+          "sql": [
+            "led_below_top_ev = true"
+          ],
+          "display_name": "led below top EV"
+        },
+        {
+          "id": "a43b9aa83afb55598a96b99c06dcdf86",
+          "sql": [
+            "measure_id = 'CBP'"
+          ],
+          "display_name": "blood pressure gaps"
+        },
+        {
+          "id": "d407d4505f175d97875b8c8add18c129",
+          "sql": [
+            "measure_id = 'COL'"
+          ],
+          "display_name": "colorectal screening gaps"
+        },
+        {
+          "id": "dbe932d711b1536e8e9fb78c5120791d",
+          "sql": [
+            "requires_human_review = true"
+          ],
+          "display_name": "drafts pending human review"
+        }
+      ],
+      "measures": [
+        {
+          "id": "491f1c1c6f67598487b7e4f56ec0d174",
+          "sql": [
+            "SUM(member_ev)"
+          ],
+          "display_name": "worklist retrievable value"
+        },
+        {
+          "id": "6a9858ea56cb5fc59de4cc64c699b8d6",
+          "sql": [
+            "MEASURE(avg_close_propensity)"
+          ],
+          "display_name": "average closure propensity"
+        },
+        {
+          "id": "860492b2a0ec5ac687a8c2ce90b705e1",
+          "sql": [
+            "MEASURE(open_gap_count)"
+          ],
+          "display_name": "open gap count"
+        },
+        {
+          "id": "9f5e81cfe38b5b4ca5b762673431c28b",
+          "sql": [
+            "MEASURE(retrievable_star_weighted_value)"
+          ],
+          "display_name": "retrievable Star-weighted value"
+        },
+        {
+          "id": "b0196498be1d592499d6b4776040f497",
+          "sql": [
+            "MEASURE(member_count)"
+          ],
+          "display_name": "member count"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "space_id": "01f1c660da191d8fac9592c222cc0648",
+  "title": "MA Stars Care-Gap Analytics (VP Stars)",
+  "url": "https://fevm-zrb-fe-bar-uhc-stars.cloud.databricks.com/genie/rooms/01f1c660da191d8fac9592c222cc0648",
+  "warehouse_id": "c6360590bf1c28d6",
+  "catalog": "zrb_fe_bar_uhc_stars_catalog",
+  "tables": [
+    "zrb_fe_bar_uhc_stars_catalog.governance.member_dim",
+    "zrb_fe_bar_uhc_stars_catalog.governance.measure_weights",
+    "zrb_fe_bar_uhc_stars_catalog.governance.gap_scores",
+    "zrb_fe_bar_uhc_stars_catalog.governance.worklist",
+    "zrb_fe_bar_uhc_stars_catalog.governance.care_gaps",
+    "zrb_fe_bar_uhc_stars_catalog.governance.outreach_drafts"
+  ],
+  "metric_view": "zrb_fe_bar_uhc_stars_catalog.governance.star_value_metrics",
+  "scratch_trap": "zrb_fe_bar_uhc_stars_catalog.analytics_sandbox.star_value_rollup",
+  "n_sample_questions": 8,
+  "n_example_sqls": 12
+}

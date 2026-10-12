@@ -46,7 +46,7 @@ One connected journey, raw files to a worklist a coordinator actually works. The
 | 4. ML propensity model | Gradient-boosted propensity-to-close, MLflow tracked, UC registered, batch scored | Built |
 | 5. GenAI drafting | Governed Unity AI Gateway endpoint (guardrails, rate limit, usage tracking) over Claude Sonnet 5.5, drafts human-review outreach with no PHI sent to the model | Built |
 | 6. Lakebase worklist | Managed Postgres serving the ranked worklist with transactional write-back; ai_decide picks the per-member lead ask | Built |
-| 7. Genie space | Natural-language analytics over the gold tables for the quality manager | Planned |
+| 7. Genie space | Governed natural-language analytics for the VP Stars persona over a certified star schema (member + measure dimensions, scored-gap / worklist / inventory / draft facts) with declared PK/FK relationships, a certified metric view, and a planted uncertified trap to prove the ontology prefers certified sources | Built |
 | 8. Databricks App | Coordinator worklist UI, reads Lakebase, logs outreach back | Planned |
 
 ## Running it
