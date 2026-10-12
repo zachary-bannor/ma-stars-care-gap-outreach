@@ -1,0 +1,20 @@
+# Layer 8: the coordinator worklist Databricks App (DAB resource).
+# `bundle deploy` creates the app and its dedicated service principal, uploads the
+# source from source_code_path, and grants the app SP READ on the coordinator secret.
+# `bundle run coordinator_app` then installs requirements and starts the app.
+resources:
+  apps:
+    coordinator_app:
+      name: zrb-stars-coordinator
+      description: >-
+        Stars care-gap coordinator worklist. Reads the Lakebase serving table
+        ops.worklist and records outreach transactionally to ops.coordinator_action
+        and ops.worklist_status, as the governed coordinator service principal.
+      source_code_path: ../src/08_app
+      resources:
+        - name: coord-sp-secret
+          description: Coordinator SP OAuth secret for Lakebase M2M (scope set up by 00_setup_app.py).
+          secret:
+            scope: zrb_stars_app
+            key: coord_sp_secret
+            permission: READ

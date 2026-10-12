@@ -1,0 +1,8 @@
+# Layer 8 coordinator worklist app. Installed by the Databricks Apps runtime at deploy.
+# Floors chosen to guarantee the APIs this app uses while staying resolvable on the
+# Apps base image: databricks.sdk database credential API, psycopg 3 (binary build so
+# no system libpq is required), Streamlit UI, pandas for the worklist table.
+streamlit>=1.40
+psycopg[binary]>=3.2
+pandas>=2.0
+databricks-sdk>=0.40

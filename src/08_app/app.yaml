@@ -1,0 +1,22 @@
+# Databricks App runtime config (lives in the app source root).
+# For Streamlit the runtime injects STREAMLIT_SERVER_PORT (= DATABRICKS_APP_PORT),
+# STREAMLIT_SERVER_ADDRESS=0.0.0.0 and STREAMLIT_SERVER_HEADLESS=true, so the command
+# needs no port flags. DATABRICKS_HOST is auto-injected; the coordinator SP client
+# secret is injected from the attached secret resource via valueFrom (never inlined).
+command:
+  - streamlit
+  - run
+  - app.py
+env:
+  - name: LAKEBASE_INSTANCE
+    value: 'zrb-stars-worklist'
+  - name: PG_SCHEMA
+    value: 'ops'
+  - name: PG_DATABASE
+    value: 'databricks_postgres'
+  - name: COORD_CLIENT_ID
+    value: '07369d4b-134b-42bb-b2aa-25c57456404d'
+  - name: COORD_CLIENT_SECRET
+    valueFrom: coord-sp-secret
+  - name: STREAMLIT_GATHER_USAGE_STATS
+    value: 'false'
